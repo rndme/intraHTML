@@ -20,12 +20,12 @@ Setting div.innerHTML with new content normal destroys form values, selections, 
 It turns DOMs and HTML content into lightweight representations of the elements as plain JS objects, DIFFs the old and new objects to generate a change list, then applies that change-list to live dom. If you have html that defines 1000 table rows and you change one row, only one row on the screen will be adjusted, preserving text inputs and selections on the unchanged areas.
 
 
-### How is intraHTML's vdom different than react's virtual dom?
-intraHTML doesn't require keeping a virtual model synced, so you can use it with use web components, angular, jQuery/bootstrap widgets, and other dom-modifying utilities without breaking the update mechanism. It also doesn't dirty up the DOM with unique IDs, allowing for cleaner and shorter HTML snapshots. Lastly, it doesn't require any conventions or style or tools, it's just a function that updates the DOM with a string, wherever that string might come from.
+### How is intraHTML different than react, vue, deku, angular, and others?
+intraHTML is less dogmatic; it's just a function that updates the DOM with a string, wherever that string might come from. There is no API, no special way of building components, no list of banned libraries or practices, no build process required, and no browser blacklist; even IE8 works with just a generic ES5 polyfill. In short, there's not much to intraHTML, which means less to get in your way, less to learn, and less to worry about.
 
 
 ### Is it fast?
-intraHTML can re-render a template and re-sync the DOM at 60FPS on a modest ultrabook. You can just render a template 60 times a second and the user would never be the wiser, unless your content is that rapidly changing. Views comprised of hundreds of elements are typically DIFFed in less than a millisecond. For most applications, update times are well-within human expectations.
+intraHTML can easily re-render a template and re-sync the DOM at 60FPS on a modest ultrabook. DOM updates are applied at about the same rate as react. Views comprised of hundreds of elements are typically DIFFed in less than a millisecond. While a heavy-investment setup like React will likely scale better to huge interfaces (10,000+ elements), for most real-world applications, intraHTML's updates occur well-within human expectations.
 
 
 
