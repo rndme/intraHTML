@@ -284,6 +284,7 @@ function applyChanges(change, INDEX, ALLS) {
 					} else {
 						var it = ochange.elmParents.slice(-1)[0];
 						if(it[0]) it = it[it.length-1];
+						if(ochange.elm && ochange.elm.length==ochange.key) it=ochange.elm[0].parentNode;
 						if(it !== content) {
 							if(it.nodeType != 3) {
 								it.appendChild(content);
