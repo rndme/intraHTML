@@ -1,12 +1,8 @@
 # intraHTML
-a version of div.innerHTML that preserves view/user state while updating
+## A version of div.innerHTML that preserves view/user state while updating
 
-## Usage: 
+### Usage
 `intraHTML(element, strNewInnerHTMLContent);`
-
-Combines the user-friendliness of data-binding with the flexibility of html string generation.
-
-Setting div.innerHTML with new content normal destroys form values, selections, scroll positions, and AT cursors. With intraHTML, you can use a just-as-simple command without the nasty side-effects. This lets any and all template systems, like mustache, handlebars, php (via ajax) smoothly and seamlessly keep a view updated. 
 
 ### Replace the old and busted:
 ` main.innerHTML=myContent; `
@@ -14,10 +10,20 @@ Setting div.innerHTML with new content normal destroys form values, selections, 
 ### With the fresh and shiny:
 ` intraHTML(main, myContent); `
 
+## Why use it?
+It combines the user-friendliness of data-binding with the flexibility of html string generation.
+
+Setting div.innerHTML with new content normal destroys form values, selections, scroll positions, and A.T. cursors. Sadly, generating HTML these days is incredibly fast and convenient, with everything from templates like Mustache/Handlbars/Jade, to PHP and it's cornucopia of frameworks. If one could simply generate new HTML and show it, apps would be easy to develop. With intraHTML, you can basically update your entire view all the time without the nasty side-effects. This lets any and all template systems seamlessly keep a view updated. 
 
 
 ### How does it work?
-It turns DOMs and HTML content into lightweight representations of the elements as plain JS objects, DIFFs the old and new objects to generate a change list, then applies that change-list to live dom. If you have html that defines 1000 table rows and you change one row, only one row on the screen will be adjusted, preserving text inputs and selections on the unchanged areas.
+
+1. Turns existing dom branch into a JS-object virtual DOM
+2. Turn the new HTML content into a virtual DOM
+3. DIFF the existing and new vdom to generate a change list
+4. apply the list of changes to the live DOM to update the view
+
+If you have html that defines 1000 table rows and you change 1 row, only 1 row on the screen will be adjusted, preserving text inputs and selections on the 999 unchanged rows.
 
 
 ### How is intraHTML different than react, vue, deku, angular, and others?
