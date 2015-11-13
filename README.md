@@ -1,5 +1,5 @@
 # intraHTML
-## A version of div.innerHTML that preserves view/user state while updating
+## like div.innerHTML, but doesn't suck
 
 ### Usage
 `intraHTML(element, strNewInnerHTMLContent);`
