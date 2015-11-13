@@ -199,7 +199,7 @@ function applyChanges(change, INDEX, ALLS) {
 
 
 
-		if(!ochange.isAttrib && typeof change.val === "string") {
+		if(!ochange.isAttrib && (typeof change.val === "string" || Array.isArray(change.val))) {
 
 
 			if(!ochange.elmParent.childNodes) ochange.elmParent = ochange.elmParent[ochange.key];
@@ -283,7 +283,7 @@ function applyChanges(change, INDEX, ALLS) {
 						ochange.elmParent[ochange.key + i] = content;
 					} else {
 						var it = ochange.elmParents.slice(-1)[0];
-						if(it[0]) it = it[0];
+						if(it[0]) it = it[it.length-1];
 						if(it !== content) {
 							if(it.nodeType != 3) {
 								it.appendChild(content);
@@ -320,6 +320,7 @@ function applyChanges(change, INDEX, ALLS) {
 			}
 			change.elm = ochange.elmParent;
 		} else {
+			toRemove=	[].slice.call(ochange.elmParent, change.index, change.index+change.num);
 			toRemove.map(function(a) {
 				a.parentNode.removeChild(a);
 			});
@@ -343,23 +344,19 @@ function getRenderer(dest, vdom, hint) {
 	if(typeof dest === "string") dest = document.querySelector(dest);
 	
 	var tag = dest.tagName.toLowerCase(),
-		str = dest.outerHTML;
-			
-	var head = str.slice(0, str.indexOf(">")) + ">";
-	
-	var inner=str.slice(head.length, str.lastIndexOf("<")-1);
+		str = dest.outerHTML,
+		head = str.slice(0, str.indexOf(">")) + ">",
+		inner=str.slice(head.length, str.lastIndexOf("<")-1);
+		
 	if(hint.trim()===inner.trim()) return {update: Boolean};
-			
+	if(!inner) inner = dest.innerHTML = " ";
 	if(!vdom) vdom = str;
-	if(vdom instanceof Element) vdom = fromHTML(vdom, tag);
-	if(typeof vdom === "string") vdom = fromHTML(vdom, tag);
-
+	if(vdom instanceof Element || typeof vdom === "string" ) vdom = fromHTML(vdom, tag);
 
 	var state = {
 		dest: dest,
 		vdom: vdom,
-		hint: hint, 
-		inner: inner,
+		//debug: true,
 		update: function(vdom) {
 
 			if(typeof vdom === "string") {
@@ -380,7 +377,7 @@ function getRenderer(dest, vdom, hint) {
   
   
   function intraHTML(elm, content){
-	 return intraHTML._last=getRenderer(elm, elm, content).update(content);
+	 return intraHTML._last=getRenderer(elm, elm, content),  intraHTML._last.update(content);
   } 
   
   
@@ -398,4 +395,4 @@ function getRenderer(dest, vdom, hint) {
   
   return intraHTML;
   
-})); 
+}));
