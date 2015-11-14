@@ -2,13 +2,17 @@
 ## makes HTML as easy to update as it is to create
 
 ### Usage
-`intraHTML(element, strNewInnerHTMLContent);`
 
-### Replace the old and busted:
+`intraHTML(element, strNewInnerHTMLContent);` <br />
+
+#### Install
+donwload, `npm install intrahtml`,  or `bower isntall intrahtml`
+
+#### Replace the old and busted:
 ` main.innerHTML=myContent; ` <br />
 ` main.html(myContent); `
 
-### With the fresh and shiny:
+#### With the fresh and shiny:
 ` intraHTML(main, myContent); ` <br />
 ` $(main).intraHTML(myContent); `
 
