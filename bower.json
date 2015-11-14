@@ -1,0 +1,20 @@
+{
+  "name": "intrahtml",
+  "main": "intrahtml.js",
+  "version": "1.0.1",
+  "homepage": "https://github.com/rndme/intrahtml/",
+  "description": "Makes HTML as easy to update as it is to create",
+  "moduleType": [
+    "amd",
+    "globals",
+    "node"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
