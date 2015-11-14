@@ -50,4 +50,17 @@ The [perf demo](http://danml.com/intrahtml/demos/perf/) lets you tests dynamic l
 * The [Minimal Investment Demo](http://danml.com/intrahtml/demos/minimal/) uses a half-dozen lines to sync view + bundle updates
 
 
+### Advantages
+* simple way to accomplish "data binding" (smooth partial updates) with an existing vanilla JS project
+* tiny compared to other packages and frameworks - less to learn, break, and deliver to users
+* allows showing html from a server without scrolling/deselecting/etc - php games?
+* scanning the live DOM before DIFFing allows other tools/plugins that modify the DOM, unlike Angular and React
+* clean HTML input and output, no "almost HTML", no invalid attributes, no messy unique IDs
+* provides a change-log that can be used to save changes, merge batches of changes, undo changes, etc... 
 
+### Disadvantages
+ * very few features compared to view-centric frameworks
+ * scanning the live DOM before DIFFing potentially costs CPU compared to virtual-view memorizing frameworks
+ * the DIFF algo may not be the fastest or result in the most compact set of mutations possible
+ * clean HTML input requires extra HTML parsing compared to pre-parsed virtual DOMs
+ * reliance on window.document methods restricts operation to web browsers (no node, workers, etc)
