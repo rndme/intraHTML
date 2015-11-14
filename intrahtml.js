@@ -270,7 +270,7 @@ function applyChanges(change, INDEX, ALLS) {
 
 				if(!ochange.elmParent.length) ochange.elmParent = ochange.elmParents.slice(-1)[0].childNodes;
 
-				var content = typeof val === "string" ? document.createTextNode(val) : elementFromString(toHT(val), ochange.elmParent[0].parentNode.tagName).firstChild,
+				var content = typeof val === "string" ? document.createTextNode(val) : elementFromString(toHT(val), ochange.elmParent[0] && ochange.elmParent[0].parentNode.tagName).firstChild,
 					ext = ochange.elmParent[ochange.key + i];
 
 				change.elm = content;
@@ -349,25 +349,37 @@ function getRenderer(dest, vdom, hint) {
 		head = str.slice(0, str.indexOf(">")) + ">",
 		inner=str.slice(head.length, str.lastIndexOf("<")-1);
 		
-	if(hint.trim()===inner.trim()) return {update: Boolean};
+	if(hint && hint.trim()===inner.trim()) return {update: Boolean};
 	if(!inner) inner = dest.innerHTML = " ";
 	if(!vdom) vdom = str;
+	
+	
+	
 	if(vdom instanceof Element || typeof vdom === "string" ) vdom = fromHTML(vdom, tag);
+
+	var st=performance.now();
 
 	var state = {
 		dest: dest,
 		vdom: vdom,
 		//debug: true,
+		initTime: st-it,
 		update: function(vdom) {
 
+			var st=performance.now();
 			if(typeof vdom === "string") {
 				var newHT = head + vdom + "</" + tag + ">";
 				vdom = fromHTML(newHT, tag);
 				state.newHt=newHT;
 			}
+			state.parseTime= (performance.now() - st);			
 			state.vdom2 = vdom;
+			st=performance.now();
 			state.changes = odiff(state.vdom, vdom);
+			state.diffTime= performance.now() - st;
+			st=performance.now();
 			state.changes.forEach(applyChanges, state);
+			state.applyTime= performance.now() - st;
 			return state;
 		}
 	};
@@ -387,7 +399,8 @@ function getRenderer(dest, vdom, hint) {
   intraHTML.toHTML = toHT;
   intraHTML.fromHTML = fromHTML;
   intraHTML.elementFromString=elementFromString;
-
+  
+  intraHTML.getRenderer = getRenderer;
  // jQuery plugin:
   if(pub.jQuery) pub.jQuery.fn.intraHTML=function(strContent){
      this.each(function(i,e){ intraHTML(e, strContent);});
