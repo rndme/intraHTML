@@ -5,11 +5,11 @@
 `intraHTML(element, strNewInnerHTMLContent);`
 
 ### Replace the old and busted:
-` main.innerHTML=myContent; `
+` main.innerHTML=myContent; ` <br />
 ` main.html(myContent); `
 
 ### With the fresh and shiny:
-` intraHTML(main, myContent); `
+` intraHTML(main, myContent); ` <br />
 ` $(main).intraHTML(myContent); `
 
 ## Why use it?
