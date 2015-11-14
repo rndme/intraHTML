@@ -6,7 +6,7 @@
 `intraHTML(element, strNewInnerHTMLContent);` <br />
 
 #### Install
-donwload, `npm install intrahtml`,  or `bower isntall intrahtml`
+donwload, `npm install intrahtml`,  or `bower install intrahtml`
 
 #### Replace the old and busted:
 ` main.innerHTML=myContent; ` <br />
