@@ -10,11 +10,11 @@ donwload, `npm install intrahtml`,  or `bower install intrahtml`
 
 #### Replace the old and busted:
 ` main.innerHTML=myContent; ` <br />
-` $(main).html(myContent); `
+` $("#main").html(myContent); `
 
 #### With the fresh and shiny:
 ` intraHTML(main, myContent); ` <br />
-` $(main).intraHTML(myContent); `
+` $("#main").intraHTML(myContent); `
 
 ## Why use it?
 It combines the user-friendliness of data-binding with the flexibility of html string generation.
