@@ -15,7 +15,9 @@
 ## Why use it?
 It combines the user-friendliness of data-binding with the flexibility of html string generation.
 
-Setting div.innerHTML with new content normal destroys form values, selections, scroll positions, and A.T. cursors. Sadly, generating HTML these days is incredibly fast and convenient, with everything from templates like Mustache/Handlbars/Jade, to PHP and it's cornucopia of frameworks. If one could simply generate new HTML and show it, apps would be easy to develop. With intraHTML, you can basically update your entire view all the time without the nasty side-effects. This lets any and all template systems seamlessly keep a view updated. 
+Setting div.innerHTML with new content destroys form values, selections, scroll positions, and mode. Conversely, generating HTML these days is incredibly fast and convenient with everything from templates like Mustache/Handlbars/Jade, to PHP and it's cornucopia of frameworks. 
+
+If one could simply generate new HTML and show it, apps would be easy to develop. Now, it's easy to do just that. With intraHTML, you can update your entire view without the nasty side-effects. Any and all template systems can seamlessly keep a view updated. 
 
 
 ### How does it work?
@@ -24,6 +26,9 @@ Setting div.innerHTML with new content normal destroys form values, selections, 
 2. Turn the new HTML content into a virtual DOM
 3. DIFF the existing and new vdom to generate a change list
 4. apply the list of changes to the live DOM to update the view
+
+The [infoview demo](http://danml.com/intrahtml/demos/infoview/) makes the parts and workings clear.
+
 
 If you have html that defines 1000 table rows and you change 1 row, only 1 row on the screen will be adjusted, preserving text inputs and selections on the 999 unchanged rows.
 
@@ -35,7 +40,14 @@ intraHTML is less dogmatic; it's just a function that updates the DOM with a str
 ### Is it fast?
 intraHTML can easily re-render a template and re-sync the DOM at 60FPS on a modest ultrabook. DOM updates are applied at about the same rate as react. Views comprised of hundreds of elements are typically DIFFed in less than a millisecond. While a heavy-investment setup like React will likely scale better to huge interfaces (10,000+ elements), for most real-world applications, intraHTML's updates occur well-within human expectations.
 
+The [perf demo](http://danml.com/intrahtml/demos/perf/) lets you tests dynamic lists of various sizes.
 
+
+### Got any demos?
+
+* The [Github Cards Demo](http://danml.com/intrahtml/demos/githubcards/) was modeled after a react demo, but uses a lot less code.
+* The [Todo Demo](http://danml.com/intrahtml/demos/todo/) is a todoMVC-ish demo that uses intraHTML for the model display
+* The [Minimal Investment Demo](http://danml.com/intrahtml/demos/minimal/) uses a half-dozen lines to sync view + bundle updates
 
 
 
