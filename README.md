@@ -10,7 +10,7 @@ donwload, `npm install intrahtml`,  or `bower install intrahtml`
 
 #### Replace the old and busted:
 ` main.innerHTML=myContent; ` <br />
-` main.html(myContent); `
+` $(main).html(myContent); `
 
 #### With the fresh and shiny:
 ` intraHTML(main, myContent); ` <br />
