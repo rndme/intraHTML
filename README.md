@@ -1,5 +1,5 @@
 # intraHTML
-## like div.innerHTML, but doesn't suck
+## makes HTML as easy to update as it is to create
 
 ### Usage
 `intraHTML(element, strNewInnerHTMLContent);`
