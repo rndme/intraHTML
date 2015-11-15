@@ -26,12 +26,12 @@ If one could simply generate new HTML and show it, apps would be easy to develop
 
 ### How does it work?
 
-For a div with 1 sub-tag: `<div id=d><br></div>` suppose we call `intraHTML(d,"<hr />");` : 
+For a div with 1 sub-tag: `<div id="d"><br></div>` suppose we call `intraHTML(d,"<hr />");` : 
 
 1. Turns existing DOM branch into a JS-object virtual DOM  ` <br> -> {$:"br"} `
 2. Turns the new HTML content into a virtual DOM  ` "<hr />" -> {$:"hr"} `
 3. DIFFs old and new virtual DOM to make a change list  ` [{type: "set", path: ["$"], val: "hr"}] `
-4. Applies list of changes to the live DOM to update the view ` <div id=d><hr></div> `
+4. Applies list of changes to the live DOM to update the view ` <div id="d"><hr></div> `
 
 The [infoview demo](http://danml.com/intrahtml/demos/infoview/) makes the parts and workings clear.
 
