@@ -28,7 +28,7 @@ If one could simply generate new HTML and show it, apps would be easy to develop
 
 1. Turns existing DOM branch into a JS-object virtual DOM  ` <br> -> {$:"br"} `
 2. Turns the new HTML content into a virtual DOM  ` "<hr />" -> {$:"hr"} `
-3. DIFFs the existing and new vdom to generate a change list  ` [$ - > "hr"] `
+3. DIFFs the existing and new vdom to generate a change list  ` [{type: "set", path: ["$"], val: "hr"}] `
 4. Applies list of changes to the live DOM to update the view ` <hr> `
 
 The [infoview demo](http://danml.com/intrahtml/demos/infoview/) makes the parts and workings clear.
