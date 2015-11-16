@@ -249,24 +249,34 @@ function applyChanges(change, INDEX, ALLS) {
 			break;
 		}
 
-		var temp = elementFromString(toHT(change.val), ochange.parent.$).firstChild;
+		if(ochange.elm.length && change.val === change.sdgfdf ){
+			// remove all the children
+			[].slice.call(ochange.elm).forEach(function(a){
+				a.parentNode.removeChild(a);				
+			});
+			delete ochange.parent[key]; //update velm
+		}else{
+			var temp = elementFromString(toHT(change.val), ochange.parent.$ ).firstChild;
 
-		change.elm = temp;
-		ochange.elm.parentNode.insertBefore(temp, ochange.elm);
-		ochange.elm.remove();
-		ochange.parent[key] = change.val; //update velm
+			if(bug) console.log("element replacing", [ochange.elm.outerHTML || ochange.elm.textContent], " with ", [temp.outerHTML]);
+			change.elm=temp;
+			ochange.elm.parentNode.insertBefore(temp, ochange.elm);
+			ochange.elm.parentNode.removeChild(ochange.elm);
+			ochange.parent[key] = change.val; //update velm
+		}
+		
 		break;
 
 
 	case "add":
 		if(!ochange.isAttrib) {
-			change.vals.forEach(function _valUpdater(val, i) {
 				if(ochange.key == "_") {
 					ochange.elm = ochange.elm[change.index];
 					ochange.key = change.index;
 					ochange.parent = ochange.parent._;
 					ochange.elmParent = ochange.elmParent.childNodes;
 				}
+			change.vals.forEach(function _valUpdater(val, i) {
 
 				if(!ochange.elmParent.length) ochange.elmParent = ochange.elmParents.slice(-1)[0].childNodes;
 
@@ -284,7 +294,7 @@ function applyChanges(change, INDEX, ALLS) {
 					} else {
 						var it = ochange.elmParents.slice(-1)[0];
 						if(it[0]) it = it[it.length-1];
-						if(ochange.elm && ochange.elm.length==ochange.key) it=ochange.elm[0].parentNode;
+						if(ochange.elm && ochange.elm.length>=ochange.key) it=ochange.elm[0].parentNode;
 						if(it !== content) {
 							if(it.nodeType != 3) {
 								it.appendChild(content);
@@ -321,12 +331,19 @@ function applyChanges(change, INDEX, ALLS) {
 			}
 			change.elm = ochange.elmParent;
 		} else {
-			toRemove=	[].slice.call(ochange.elmParent, change.index, change.index+change.num);
+			
+			if(change.index-change.num>-1){
+				toRemove=[].slice.call(ochange.elmParent, change.index-change.num, change.index);
+			}else{
+				toRemove=[].slice.call(ochange.elmParent, change.index, change.index+change.num);
+			}
+
+			if(toRemove.length) change.elm = toRemove[0].parentNode;
+
 			toRemove.map(function(a) {
 				a.parentNode.removeChild(a);
 			});
-			change.elm = toRemove[0].parentNode;
-			ochange.parent.splice(min + 1, max + 1);
+			ochange.parent.splice( (change.index-change.num )+1, change.num);			
 		}
 	}
 
@@ -370,7 +387,6 @@ function getRenderer(dest, vdom, hint) {
 			if(typeof vdom === "string") {
 				var newHT = head + vdom + "</" + tag + ">";
 				vdom = fromHTML(newHT, tag);
-				state.newHt=newHT;
 			}
 			state.parseTime= (performance.now() - st);			
 			state.vdom2 = vdom;
@@ -383,6 +399,7 @@ function getRenderer(dest, vdom, hint) {
 			return state;
 		}
 	};
+	getRenderer.last=state;
 	return state;
 }
 
@@ -393,7 +410,7 @@ function getRenderer(dest, vdom, hint) {
 	 return intraHTML._last=getRenderer(elm, elm, content),  intraHTML._last.update(content);
   } 
   
-  
+  intraHTML.odiff=odiff;
   intraHTML.updater=getRenderer;
   intraHTML.applyChanges = applyChanges;
   intraHTML.toHTML = toHT;
