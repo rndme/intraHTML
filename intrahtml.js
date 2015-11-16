@@ -189,32 +189,50 @@ function applyChanges(change, INDEX, ALLS) {
 
 	if(typeof ochange.elm == "function") ochange.elm = ochange.elmParent;
 
-
-
+	var bug = this.debug;
+	if(bug) console.info("CHANGE", ochange, elm);
 
 	switch(change.type) {
 
 
 	case "set":
 
-
-
 		if(!ochange.isAttrib && (typeof change.val === "string" || Array.isArray(change.val))) {
-
 
 			if(!ochange.elmParent.childNodes) ochange.elmParent = ochange.elmParent[ochange.key];
 			if(!ochange.elm) ochange.elm = ochange.elmParent;
-			if(ochange.elm.childNodes) {
-
-				var content = document.createTextNode(change.val);
-				ochange.elm.parentNode.insertBefore(content, ochange.elm);
-				ochange.elm.parentNode.removeChild(ochange.elm);
-				change.elm = content;
-			} else {
-				ochange.elm.textContent = change.val; //update element
-				change.elm = ochange.elm;
-			}
-			ochange.parent[key] = change.val; //update velm
+		
+			var val=change.val;
+			if(!Array.isArray(val)) val=[val];
+			val.forEach(function(val, i){
+				
+				if(typeof val==="string"){ //add text nodes:
+					
+					if(ochange.elm.childNodes) {
+						var content = document.createTextNode(val);
+						ochange.elm.parentNode.insertBefore(content, ochange.elm);
+						ochange.elm.parentNode.removeChild(ochange.elm);
+						change.elm = content;
+					} else {
+						ochange.elm.textContent = val; //update element
+						change.elm = ochange.elm;
+					}			
+				
+				}else{ //add elms:
+				
+					var content = typeof val === "string" ? document.createTextNode(val) : elementFromString(toHT(val), ochange.elmParent[0] && ochange.elmParent[0].parentNode.tagName).firstChild;
+					if(!ochange.elm.parentNode) ochange.elm=ochange.elmParent;
+						var old=ochange.elm.childNodes[+key+i];						
+						if(old){
+							ochange.elm.insertBefore(content, old);
+							ochange.elm.removeChild(ochange.elm);
+						}else{
+							ochange.elm.appendChild(content);
+						}
+				}
+				ochange.parent[+key+i] = val; //update velm
+			});
+			
 			break;
 		}
 
@@ -333,7 +351,11 @@ function applyChanges(change, INDEX, ALLS) {
 		} else {
 			
 			if(change.index-change.num>-1){
-				toRemove=[].slice.call(ochange.elmParent, change.index-change.num, change.index);
+				if(change.num===1){
+					toRemove=[ochange.elmParent[change.index]];
+				}else{
+					toRemove=[].slice.call(ochange.elmParent, change.index-change.num, change.index);
+				}				
 			}else{
 				toRemove=[].slice.call(ochange.elmParent, change.index, change.index+change.num);
 			}
@@ -379,7 +401,7 @@ function getRenderer(dest, vdom, hint) {
 	var state = {
 		dest: dest,
 		vdom: vdom,
-		//debug: true,
+		debug: intraHTML.debug, 
 		initTime: st-it,
 		update: function(vdom) {
 
