@@ -207,6 +207,7 @@ function applyChanges(change, INDEX, ALLS) {
 			val.forEach(function(val, i){
 				
 				if(typeof val==="string"){ //add text nodes:
+					if(ochange.elm instanceof NodeList) ochange.elm= ochange.elmParent;
 					
 					if(ochange.elm.childNodes) {
 						var content = document.createTextNode(val);
