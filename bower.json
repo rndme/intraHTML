@@ -1,7 +1,7 @@
 {
   "name": "intrahtml",
   "main": "intrahtml.js",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "homepage": "https://github.com/rndme/intrahtml/",
   "description": "Makes HTML as easy to update as it is to create",
   "moduleType": [
