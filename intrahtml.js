@@ -351,22 +351,37 @@ function applyChanges(change, INDEX, ALLS) {
 			change.elm = ochange.elmParent;
 		} else {
 			
+			var recon;
 			if(change.index-change.num>-1){
 				if(change.num===1){
 					toRemove=[ochange.elmParent[change.index]];
+					recon=function(){ ochange.parent.splice( (change.index-change.num )+1, change.num);		 };
 				}else{
-					toRemove=[].slice.call(ochange.elmParent, change.index-change.num, change.index);
+					if(change.index+change.num < ochange.elmParent.length+1  ){ //|| change.index+change.num > ochange.elmParent.length 
+						
+						if(bug) console.log("removing many up",  ochange.elmParent, change.index, change.index+change.num);
+						toRemove =[].slice.call(ochange.elmParent, change.index, change.index+change.num);
+						recon=function(){ochange.parent.splice( change.index, change.num);			}
+						
+					}else{ //count backwards:
+						if(bug) console.log("removing many down",  [].slice.call(ochange.elmParent), change.index-change.num, change.index );
+						//toRemove=[].slice.call(ochange.elmParent, change.index-change.num, change.index); //working?
+						toRemove =[].slice.call(ochange.elmParent, (change.index-change.num )+1, (change.index)+1)
+						recon=function(){ ochange.parent.splice( (change.index-change.num )+1 , change.num);		 };
+					}
 				}				
 			}else{
 				toRemove=[].slice.call(ochange.elmParent, change.index, change.index+change.num);
+				recon=function(){ ochange.parent.splice( change.index, change.num);		 };
 			}
 
 			if(toRemove.length) change.elm = toRemove[0].parentNode;
 
+			if(bug) console.log("removing:", toRemove, change, ochange.parent.slice( (change.index-change.num )+1, (change.index)+1), [].slice.call(change.elm.childNodes) );
 			toRemove.map(function(a) {
 				a.parentNode.removeChild(a);
 			});
-			ochange.parent.splice( (change.index-change.num )+1, change.num);			
+			recon();
 		}
 	}
 
