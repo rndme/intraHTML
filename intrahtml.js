@@ -431,6 +431,7 @@ function toHT(obj) {
 function applyChanges(change, INDEX, ALLS) {
 
 	var startTime = performance.now(),
+	bug = this.debug,
 	path = change.path.concat(change.index || change.key).filter(function(a) {
 		return a != null;
 	}),
@@ -457,24 +458,14 @@ function applyChanges(change, INDEX, ALLS) {
 			isAttrib: !(key - 0.1) && key != "_" && key != "$",
 			change: change
 		};
+		
 
 	if(typeof ochange.elm == "function") ochange.elm = ochange.elmParent;
-
-	var bug = this.debug;
-	
-	//if(bug) console.warn("actual", this.dest.outerHTML);
-	//if(bug) console.warn("ideals", toHT(this.vdom));
-	
-	var k1=this.dest.outerHTML.replace(/=""/g,""), k2=toHT(this.vdom);
-	if(k1!=k2){
-		if(bug) console.warn("actual", k1);
-		if(bug) console.warn("ideals", toHT(this.vdom));
-	}
-
-	var oldVDOM=JSON.parse(JSON.stringify(this.vdom));
-	
 	if(bug) console.info("CHANGE: " + INDEX, ochange);
 
+	
+	
+	
 	switch(change.type) {
 
 
@@ -497,11 +488,6 @@ function applyChanges(change, INDEX, ALLS) {
 				
 				if(typeof val==="string"){ //add text nodes:
 					
-					
-					
-				//	if(bug) console.log( "elm", cp, ochange.elmParent );
-					
-					//if(ochange.elm instanceof NodeList) ochange.elm= ochange.elmParent;
 					if(ochange.elm  instanceof NodeList) ochange.elm = ochange.elmParents.filter(function(a){return a.textContent !== a.fsdhjklghdklg; }).pop();
 					
 					if(ochange.elm.childNodes) {
@@ -510,16 +496,12 @@ function applyChanges(change, INDEX, ALLS) {
 						
 						if(ochange.key==="_"){
 							ochange.elm.textContent = val;
-							//ochange.elm.insertBefore(content, ochange.elm);
-							//ochange.elm.parentNode.removeChild(ochange.elm);
 						}else{
 							if(ochange.key==="$"){
 									
 								var temp = document.createElement(change.val);
 								
 								if(bug) console.warn("changing tag name!", change);
-								
-
 								ochange.elm.parentNode.insertBefore(temp, ochange.elm);
 
 								var attrs = ochange.elm.attributes;
@@ -529,15 +511,9 @@ function applyChanges(change, INDEX, ALLS) {
 								}
 								var kids = ochange.elm.childNodes;
 								for(var i = 0, mx = kids.length; i < mx; i++) temp.appendChild(kids[0]);
-								//change.elm = temp;
 								ochange.elm.parentNode.removeChild(ochange.elm);
-
 								ochange.parent[key] = change.val; //update velm
-								
-				
-				
-									
-									//dd666
+
 							}else{
 								ochange.elm.parentNode.insertBefore(content, ochange.elm);
 								ochange.elm.parentNode.removeChild(ochange.elm);
@@ -581,12 +557,6 @@ function applyChanges(change, INDEX, ALLS) {
 					ochange.parent[key] = val; //update velm
 				}
 				
-				var k1=this.dest.outerHTML.replace(/=""/g,""), k2=toHT(this.vdom);
-				if(k1!=k2){
-					if(bug) console.warn("actual", k1);
-					if(bug) console.warn("ideals", toHT(this.vdom));
-				}
-	
 			}, this);
 			
 			break;
@@ -597,10 +567,7 @@ function applyChanges(change, INDEX, ALLS) {
 		if(ochange.isAttrib) {
 			if(key == "$" && String(path) == key) throw new TypeError("You cannot change the root element of an update-bound element: " + ochange.elm.outerHTML);
 			if(key == "$") {
-				// change tag name. yikes!
-				
-				
-				
+								
 				var temp = document.createElement(change.val);
 				if(bug) console.warn("changing tag name!", change);
 				
@@ -620,9 +587,7 @@ function applyChanges(change, INDEX, ALLS) {
 				ochange.parent[key] = change.val; //update velm
 
 			} else {
-				
-				//if(ochange.elm == ochange.elmParent) ochange.elm = ochange.elm.parentNode;
-				
+								
 				if(!ochange.elm.setAttribute && ochange.elm.parentNode && ochange.elm.parentNode.setAttribute) {
 					ochange.elm = ochange.elm.parentNode;
 				}		
@@ -631,12 +596,6 @@ function applyChanges(change, INDEX, ALLS) {
 				if(!ochange.elm.setAttribute && (cc=ochange.elmParents.filter(function(a){return a.setAttribute}).slice(-1)[0]).setAttribute) {
 					ochange.elm = cc;
 				}		
-						
-				
-				
-				//if(!ochange.elm.setAttribute && ochange.elmParent.setAttribute) {
-					//ochange.elm = (ochange.elm == ochange.elmParent) ?  ochange.elm.parentNode : ochange.elmParent;
-				//}
 				
 				if(change.val===change.dgfjkdfl34534fd){
 					ochange.elm.removeAttribute(key); //update element
@@ -649,14 +608,7 @@ function applyChanges(change, INDEX, ALLS) {
 				change.elm = ochange.elm;
 			}
 			
-			
-				var k1=this.dest.outerHTML.replace(/=""/g,""), k2=toHT(this.vdom);
-				if(k1!=k2){
-					if(bug) console.warn("actual", k1);
-					if(bug) console.warn("ideals", toHT(this.vdom));
-				}
-				
-			
+						
 			break;
 		}
 
@@ -681,13 +633,7 @@ function applyChanges(change, INDEX, ALLS) {
 			ochange.elm.parentNode.removeChild(ochange.elm);
 			ochange.parent[key] = change.val; //update velm
 		}
-		
-				var k1=this.dest.outerHTML.replace(/=""/g,""), k2=toHT(this.vdom);
-				if(k1!=k2){
-					if(bug) console.warn("actual", k1);
-					if(bug) console.warn("ideals", toHT(this.vdom));
-				}
-		
+				
 		break;
 
 
@@ -737,12 +683,6 @@ function applyChanges(change, INDEX, ALLS) {
 
 		}
 		
-				var k1=this.dest.outerHTML.replace(/=""/g,""), k2=toHT(this.vdom);
-				if(k1!=k2){
-					if(bug) console.warn("actual", k1);
-					if(bug) console.warn("ideals", toHT(this.vdom));
-				}
-				
 		break;
 
 	case "rm":
@@ -761,17 +701,10 @@ function applyChanges(change, INDEX, ALLS) {
 		 var recon=Boolean;
 					
 		if(change.index === 0) { // it starts at zero, the odiff range goes positive instead of couring backwards from 0:
-		
-			//if(typeof ochange.parent[1]==="object"){
-			//if(change===1){
-			//	change.index++;
-			//		if(bug) console.log("adding to index becuase of left-side string");
-			//}
 			
 			if(bug) console.log("removing many from zero",  [].slice.call(ochange.parent), ochange.elmParent,"|||", ochange.parent[0], change.index, change.num );
 			
 			for(var i = change.index, mx = i + change.num; i < mx; i++) {
-				//if(ochange.elmParent[change.index]) 
 				ochange.elmParent[change.index].remove();
 				ochange.parent.splice(change.index, 1);
 			}
@@ -797,30 +730,15 @@ function applyChanges(change, INDEX, ALLS) {
 					if(change.index+change.num < ochange.elmParent.length+1  ){ 
 						
 						var ind= change.index;
-						//if(ind>1) ind--;
-						
-						//if( ind>1 && change.mode==="Z") ind--;
-						if( ind>1 && change.mode==="Z") ind = ind - (change.num-1);
-						
+						if( ind>1 && change.mode==="Z") ind = ind - (change.num-1);						
 						
 						if(bug) console.log("removing many up",  change.mode, ochange.elmParent, ind, ind+change.num);
 						toRemove =[].slice.call(ochange.elmParent, ind, ind+change.num);
 						recon=function(){ochange.parent.splice( ind, change.num);			}
 						
-						/*
-						var in2=(ochange.elmParent.length - change.index) - 1;
-						if(bug) console.log("alt remove", in2, ochange.elmParent.length, [].slice.call(ochange.elmParent, in2 , in2 + change.num) );
-						toRemove =  [].slice.call(ochange.elmParent, in2 , in2 + change.num) ;
-						recon=function(){ochange.parent.splice( in2, change.num);			};
-						*/
-						
-						
 					}else{ //count backwards:
 						if(bug) console.log("removing many down",  [].slice.call(ochange.elmParent), change.index-change.num, change.index );
-						//toRemove=[].slice.call(ochange.elmParent, change.index-change.num, change.index); //working?
 						toRemove =[].slice.call(ochange.elmParent, (change.index-change.num )+1, (change.index)+1)
-						
-						
 						recon=function(){ ochange.parent.splice( (change.index-change.num )+1 , change.num);		 };
 					}
 					
@@ -842,26 +760,9 @@ function applyChanges(change, INDEX, ALLS) {
 			recon();
 		}
 		
-				var k1=this.dest.outerHTML.replace(/=""/g,""), k2=toHT(this.vdom);
-				if(k1!=k2){
-					if(bug) console.warn("actual", k1);
-					if(bug) console.warn("ideals", k2);
-				}
-		
 		break;
 	}
 
-				var k1=this.dest.outerHTML.replace(/=""/g,""), k2=toHT(this.vdom);
-				if(k1!=k2){
-					if(bug) console.warn("actual", k1);
-					if(bug) console.warn("ideals", k2);
-				}
-				
-					if(bug) console.warn("vwas", JSON.stringify(oldVDOM._[0]).replace(/"([\w$]+)"\:/g,"$1:"));
-					if(bug) console.warn("vnow", JSON.stringify(this.vdom._[0]).replace(/"([\w$]+)"\:/g,"$1:"));
-					if(bug) console.warn("hnow", toHT(this.vdom._[0]));
-						
-				
 	change.runtime = performance.now() - startTime;
 
 } //end applyChanges() 
