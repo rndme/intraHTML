@@ -18,7 +18,7 @@ if(!Number.isNaN) Number.isNaN = function(value) { return typeof value === "numb
 if (!Array.isArray) Array.isArray = function(arg) { return Object.prototype.toString.call(arg) === '[object Array]';};
 var odiff=function(){function u(b,a,d,c,h,m,l){for(var e=c-m,g=h-l,k=Math.max(e,g),f=1;f<=k;f++){var n=a[c-f],v=d[h-f];if(f<=g&&f<=e&&b(n,v))return{a:c-f,b:h-f};for(var q=0;q<f;q++){var y=a[c-q],p=d[h-q];if(f<=g&&b(y,v))return{a:c-q,b:h-f};if(f<=e&&b(n,p))return{a:c-f,b:h-q}}}return{a:m-1,b:l-1}}function w(b,a){if(Array.isArray(b)){if(!Array.isArray(a))return!1;for(var d=b.length/10,c=Math.abs(b.length-a.length),h=0;h<b.length;h++)if(p(b[h],a[h])){if(2<=c&&c>d||c===b.length)return!1;c++}return!0}if("object"==typeof b){if("object"!=typeof a)return!1;if(b===a)return!0;var h=x(r(Object.keys(b)),r(Object.keys(a))),m=Object.keys(h).length,d=m/10,c=0,l;for(l in h)if(!p(b[l],a[l])){if(2<=c&&c>d||c+1===m)return!1;c++}return!0}return Number.isNaN(b)&&Number.isNaN(a)}function p(b,a){if(b===a)return!0;if(Array.isArray(b))return Array.isArray(a)&&b.length===a.length?!b.some(function(a,b,c){return!p(a,this[b])},a):!1;if("object"==typeof b){if("object"!=typeof a)return!1;var d=Object.keys(b),c=Object.keys(a);if(d.length!==c.length)return!1;for(c=0;c<d.length;c++){var h=d[c];if(!p(b[h],a[h]))return!1}return!0}return Number.isNaN(b)&&Number.isNaN(a)}function r(b){var a={};return b.forEach(function(a,b,h){this[a]=!0},a),a}function x(b,a){for(var d in a)b[d]=a[d];return b}var t=function(b,a,d,c){function h(a,b,c){a.push({type:"set",path:b,val:c})}function m(a,b,c,d){a.push({type:"rm",path:b,index:c,num:d})}function l(a,b,c,d){a.push({type:"add",path:b,index:c,vals:d})}if(!(b===a||Number.isNaN(b)&&Number.isNaN(a)))if(b instanceof Array&&a instanceof Array){for(var e=b.length-1,g=a.length-1;0<=e&&0<=g;)if(p(b[e],a[g]))e--,g--;else{for(var k=u(p,b,a,e,g,0,0),f=e;f>k.a&&g>k.b;)if(w(b[f],a[g]))t(b[f],a[g],d,c.concat([f])),f--,g--;else{var e=u(w,b,a,f,g,k.a+1,k.b+1),f=f-e.a,n=g-e.b;1===f&&1===n?h(d,c.concat(e.a+1),a[e.b+1]):1===f&&2===n?(l(d,c,e.a+2,a.slice(e.b+2,g+1)),h(d,c.concat(e.a+1),a[e.b+1])):2===f&&1===n?(m(d,c,e.a+2,1),h(d,c.concat(e.a+1),a[e.b+1])):2===f&&2===n?(h(d,c.concat(e.a+2),a[e.b+2]),h(d,c.concat(e.a+1),a[e.b+1])):(0<f&&m(d,c,e.a+1,f),0<n&&l(d,c,e.a+1,a.slice(e.b+1,g+1))),f=e.a,g=e.b}f>k.a?m(d,c,f,f-k.a):g>k.b&&l(d,c,f+1,a.slice(k.b+1,g+1)),e=k.a,g=k.b}0<=e?m(d,c,0,e+1):0<=g&&l(d,c,0,a.slice(0,g+1))}else if(b instanceof Object&&a instanceof Object)for(k in g=x(r(Object.keys(b)),r(Object.keys(a))),g)g=c.concat([k]),t(b[k],a[k],d,g);else h(d,c,a)};return function(b,a){var d=[];return t(b,a,d,[]),d}}();
   
-  
+
  var odiff2 = function(a,b) {
 
 
@@ -178,7 +178,7 @@ function similar(a,b) {
         if(!(b instanceof Array))
             return false
 
-        var tenPercent = a.length/10
+        var tenPercent = a.length/15
         var notEqual = Math.abs(a.length-b.length) // initialize with the length difference
         for(var n=0; n<a.length; n++) {
             if(equal(a[n],b[n])) {
@@ -198,7 +198,7 @@ function similar(a,b) {
 
         var keyMap = merge(arrayToMap(Object.keys(a)), arrayToMap(Object.keys(b)))
         var keyLength = Object.keys(keyMap).length
-        var tenPercent = keyLength / 10
+        var tenPercent = keyLength / 15
         var notEqual = 0
         for(var key in keyMap) {
             var aVal = a[key]
@@ -222,10 +222,10 @@ function similar(a,b) {
 
 // compares arrays and objects for value equality (all elements and members must match)
 function equal(a,b) {
-    if(a instanceof Array) {
-        if(!(b instanceof Array))
+    if(Array.isArray(a)) {
+        if(!(Array.isArray(b)))
             return false
-        if(a.length !== b.length) {
+        if(a.length !== b.length || a[0]!=b[0]) {
             return false
         } else {
             for(var n=0; n<a.length; n++) {
@@ -291,6 +291,8 @@ function merge(obj1, obj2){
 }///////////////////////////////////////////////////////////// end odiff debug copy
   
   
+  
+
   
 // given a string of html, returns a document fragment of that content:
 fragmentFromString.temp = document.createElement('template');
