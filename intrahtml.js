@@ -25,23 +25,22 @@ var odiff=function(){function u(b,a,d,c,h,m,l){for(var e=c-m,g=h-l,k=Math.max(e,
 var diffInternal = function(a,b,acc,base) {
     if(a === b || Number.isNaN(a)&&Number.isNaN(b)) {
         return;
-    } else if(a instanceof Array && b instanceof Array) {
-        var an=a.length-1,bn=b.length-1
+    } else if( Array.isArray(a) && Array.isArray(b) ) {
+        var an=a.length-1, bn=b.length-1
         while(an >= 0 && bn >= 0) {     // loop backwards (so that making changes in order will work correctly)
             if(!equal(a[an], b[bn])) {
-                var indexes = findMatchIndexes(equal, a,b, an,bn, 0, 0)
+                var indexes = findMatchIndexes(equal, a,b, an,bn, 0, 0);
 
-                var anInner=an,bnInner=bn
+                 anInner=an,bnInner=bn;
                 while(anInner > indexes.a && bnInner > indexes.b) {
                     if(similar(a[anInner], b[bnInner])) {
                         // get change for that element
                         diffInternal(a[anInner],b[bnInner],acc, base.concat([anInner]))
                         anInner--; bnInner--;
                     } else {
-                        var indexesInner = findMatchIndexes(similar, a,b, anInner,bnInner, indexes.a+1, indexes.b+1)
-
-                        var numberPulled = anInner-indexesInner.a
-                        var numberPushed = bnInner-indexesInner.b
+                        var indexesInner = findMatchIndexes(similar, a,b, anInner,bnInner, indexes.a+1, indexes.b+1),
+                         numberPulled = anInner-indexesInner.a,
+                         numberPushed = bnInner-indexesInner.b;
 
                         if(numberPulled === 1 && numberPushed === 1) {
                             set(acc, base.concat(indexesInner.a+1), b[indexesInner.b+1]) // set the one
@@ -89,11 +88,10 @@ var diffInternal = function(a,b,acc,base) {
             add(acc, base,0, b.slice(0, bn+1))
         }
 
-    } else if(a instanceof Object && b instanceof Object) {
+    } else if(typeof a ==="object"  &&  typeof b ==="object"  ) {
         var keyMap = merge(arrayToMap(Object.keys(a)), arrayToMap(Object.keys(b)))
         for(var key in keyMap) {
-            var path = base.concat([key])
-            diffInternal(a[key],b[key],acc, path)
+            diffInternal(a[key],b[key],acc, base.concat([key]))
         }
     } else {
         set(acc, base, b)
@@ -174,8 +172,8 @@ function findMatchIndexes(compareFn, a,b, divergenceIndexA,divergenceIndexB, aSu
     // less than 2 changes, or
     // less than 10% different members
 function similar(a,b) {
-    if(a instanceof Array) {
-        if(!(b instanceof Array))
+    if(Array.isArray(a)) {
+        if(! Array.isArray(b) )
             return false
 
         var tenPercent = a.length/15
@@ -192,21 +190,18 @@ function similar(a,b) {
         // else
         return true
 
-    } else if(a instanceof Object) {
-        if(!(b instanceof Object))
-            return false
+    } else if(typeof a ==="object") {
+        if(typeof b!=="object" ){  return false }
 
-        var keyMap = merge(arrayToMap(Object.keys(a)), arrayToMap(Object.keys(b)))
-        var keyLength = Object.keys(keyMap).length
-        var tenPercent = keyLength / 15
-        var notEqual = 0
-        for(var key in keyMap) {
-            var aVal = a[key]
-            var bVal = b[key]
+        var keyMap = merge(arrayToMap(Object.keys(a)), arrayToMap(Object.keys(b))),
+         keyLength = Object.keys(keyMap).length,
+         tenPercent = keyLength / 15,
+         notEqual = 0;
+        for(var key in keyMap) {      
 
-            if(!equal(aVal,bVal)) {
+            if(!equal(a[key],b[key])) {
                 if(notEqual >= 2 && notEqual > tenPercent || notEqual+1 === keyLength) {
-                    return false
+                    return false;
                 }
 
                 notEqual++
@@ -223,9 +218,9 @@ function similar(a,b) {
 // compares arrays and objects for value equality (all elements and members must match)
 function equal(a,b) {
     if(Array.isArray(a)) {
-        if(!(Array.isArray(b)))
+        if(!Array.isArray(b))
             return false
-        if(a.length !== b.length || a[0]!=b[0]) {
+        if(a.length !== b.length || a[0] !== b[0] ) {
             return false
         } else {
             for(var n=0; n<a.length; n++) {
@@ -247,11 +242,9 @@ function equal(a,b) {
             return false
         } else {
             for(var n=0; n<aKeys.length; n++) {
-                var key = aKeys[n]
-                var aVal = a[key]
-                var bVal = b[key]
+                var key = aKeys[n];
 
-                if(!equal(aVal,bVal)) {
+                if(!equal(a[key],b[key])) {
                     return false
                 }
             }
@@ -266,11 +259,9 @@ function equal(a,b) {
 
 // turns an array of values into a an object where those values are all keys that point to 'true'
 function arrayToMap(array) {
-    var result = {}
-    array.forEach(function(v) {
-        result[v] = true
-    })
-    return result
+    var i=0, mx=array.length, result = {};
+	for(i;i<mx;i++) result[array[i]] = true;
+    return result;
 }
 
 // Overwrites obj1's values with obj2's and adds obj2's if non existent in obj1
