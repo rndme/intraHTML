@@ -514,7 +514,7 @@ function getRenderer(dest, vdom, hint) {
 			state.parseTime= (performance.now() - st);			
 			state.vdom2 = vdom;
 			st=performance.now();
-			state.changes = odiff2(state.vdom, vdom) ; 
+			state.changes = odiff(state.vdom, vdom) ; 
 			state.diffTime= performance.now() - st;
 			st=performance.now();
 			state.changes.forEach(applyChanges, state);
