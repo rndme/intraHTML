@@ -78,16 +78,13 @@ function fromHTML(source, containerTagName) {
 					tag[attr.name] = attr.value;
 				}
 
-
-				tag._ = [];
-				bag.push.apply(tag._, scan(v));
-				if(tag._.length === 0) delete tag._;
+				tag._=scan(v);
 				bag.push(tag);
 
 			} else { //if sub tags? no:			  
 				bag.push(v.nodeValue);
 			}
-		} //);
+		} 
 		return bag;
 	} // end scan()
 
