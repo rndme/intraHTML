@@ -39,6 +39,21 @@ var elementFromString = function elementFromString(strHTML, containerTagName) {
 if("content" in document.createElement("template")) elementFromString = fragmentFromString;
 
 
+//need to pull from master, rewire these two in, plus the for-loop on apply changes
+function forEach(r,f,v){ 
+	"use strict";
+	if(arguments.length<2) return;
+	var m=r.length, i=0;
+	for (; i<m; i++) f(r[i],i,r);
+}
+
+function filter(r, f) { 
+	"use strict";
+	var m=r.length, o=[], i=0;		
+	for(; i<m; i++) if(f(r[i],i,r)) o.push(r[i]);
+	return o;
+}
+
 
 // given an html element or html string, returns a vdom of that markpup:
 function fromHTML(source, containerTagName) {
@@ -159,23 +174,25 @@ function applyChanges(change, INDEX, ALLS) {
 
 	var startTime = performance.now(),
 	bug = this.debug,
-	path = change.path.concat(change.index || change.key).filter(function _pathFilterer(a) {
-		return a != null;
+	path = filter(change.path.concat(change.index || change.key), function _pathFilterer(a, b, c) {
+		return a != b.xsdgdfg;
 	}),
+	slice=path.slice,
 		lastChange = ALLS[INDEX - 1] || "",
-		key = path.filter(function _keyFilterer(a) {
-			return a != null;
+		key = filter(path, function _keyFilterer(a, b, c) {
+			return a != b.xsdgdfg;
 		}).slice(-1)[0],
 		elm = resolvePath(path, this.dest),
 		parents = resolveAll(path, this.vdom),
+		elmPar=filter(elm.parents, Boolean),
 		ochange = {
 			type: change.type,
 			index: INDEX,
 			path: path,
 			key: key,
 			elm: elm.node || elm.parents.slice(-1)[0],
-			elmParents: elm.parents.filter(Boolean),
-			elmParent: elm.parents.filter(Boolean).slice(-1)[0],
+			elmParents: elmPar,
+			elmParent: elmPar.slice(-1)[0],
 			dest: this.dest,
 			parents: parents,
 			parent: parents.parents.slice(-1)[0],
@@ -203,12 +220,11 @@ function applyChanges(change, INDEX, ALLS) {
 			var vals=change.val, val;
 			if(!Array.isArray(vals)) vals=[vals];
 			
-			//val.forEach(function _valSetEacher(val, i){
 			for(var valIndex=0, maxIndex=vals.length;valIndex<maxIndex;valIndex++){
 				val=vals[valIndex];
 				
 				if(typeof val==="string"){ //add text nodes:
-					if(ochange.elm  instanceof NodeList) ochange.elm = ochange.elmParents.filter(function _setStrParFinder(a){return a.textContent !== a.fsdhjklghdklg; }).pop();
+					if(ochange.elm  instanceof NodeList) ochange.elm = filter(ochange.elmParents, function _setStrParFinder(a,b,c){return a.textContent !== a.fsdhjklghdklg; }).pop();
 					
 					if(ochange.elm.childNodes) {
 						if(bug) console.log("set: non attrib, string, elm: ", ochange.key,  [val], ochange.elm.outerHTML );
@@ -303,7 +319,7 @@ function applyChanges(change, INDEX, ALLS) {
 				}		
 				
 				var cc;
-				if(!ochange.elm.setAttribute && (cc=ochange.elmParents.filter(function _setParFinderCC(a){return a.setAttribute}).slice(-1)[0]).setAttribute) {
+				if(!ochange.elm.setAttribute && (cc=filter(ochange.elmParents, function _setParFinderCC(a,b,c){return a.setAttribute}).slice(-1)[0]).setAttribute) {
 					ochange.elm = cc;
 				}		
 				
@@ -324,13 +340,10 @@ function applyChanges(change, INDEX, ALLS) {
 		
 		
 		if(ochange.elm.length && change.val === change.sdgfdf ){
-			// remove all the children
-			[].slice.call(ochange.elm).forEach(function _setRemEacher(a){
-				a.parentNode.removeChild(a);				
-			});
+			for(var i6=0, mx6=ochange.elm.length;i6<mx6;i6++) ochange.elm[0].parentNode.removeChild(ochange.elm[0]);				
 		}else{
 			
-			if(ochange.elm instanceof NodeList) ochange.elm= ochange.elmParents.filter(function _setParFinder(a){return a.textContent !== a.fsdhjklghdklg; }).pop();
+			if(ochange.elm instanceof NodeList) ochange.elm= filter(ochange.elmParents,function _setParFinder(a,b,c){return a.textContent !== a.fsdhjklghdklg; }).pop();
 			
 			var temp = elementFromString(toHT(change.val), ochange.parent.$ ).firstChild;
 
@@ -350,7 +363,7 @@ function applyChanges(change, INDEX, ALLS) {
 					ochange.parent = ochange.parent._;
 					ochange.elmParent = ochange.elmParent.childNodes;
 				}
-			change.vals.forEach(function _valUpdater(val, i) {
+			forEach(change.vals, function _valUpdater(val, i, arrWhole) {
 
 				if(!ochange.elmParent.length) ochange.elmParent = ochange.elmParents.slice(-1)[0].childNodes;
 				if(!ochange.elmParent) ochange.elmParent = ochange.elmParents.slice(-2)[0].childNodes;
@@ -371,7 +384,7 @@ function applyChanges(change, INDEX, ALLS) {
 						if(it[0]) it = it[it.length-1];
 						if(ochange.elm && ochange.elm.length>=ochange.key) it=ochange.elm[0].parentNode;
 						
-						if(it instanceof NodeList) it= ochange.elmParents.filter(function _addParFinder(a){return a.textContent !== a.fsdhjklghdklg; }).pop();
+						if(it instanceof NodeList) it= filter(ochange.elmParents,function _addParFinder(a,b,c){return a.textContent !== a.fsdhjklghdklg; }).pop();
 						
 						if(it !== content) {
 							if(it.nodeType != 3) {
@@ -400,11 +413,11 @@ function applyChanges(change, INDEX, ALLS) {
 		// list out what to remove:
 		var min = change.index - change.num,
 			max = change.index,
-		 toRemove = [].slice.call(ochange.elmParent, min + 1, max + 1);
+		 toRemove = slice.call(ochange.elmParent, min + 1, max + 1);
 
 		if(change.index === 0) { // it starts at zero, the odiff range goes positive instead of couring backwards from 0:
 			
-			if(bug) console.log("removing many from zero",  [].slice.call(ochange.parent), ochange.elmParent,"|||", ochange.parent[0], change.index, change.num );
+			if(bug) console.log("removing many from zero",  slice.call(ochange.parent), ochange.elmParent,"|||", ochange.parent[0], change.index, change.num );
 			
 			for(var i = change.index, mx = i + change.num; i < mx; i++) {
 				ochange.elmParent[change.index].remove();
@@ -420,7 +433,7 @@ function applyChanges(change, INDEX, ALLS) {
 					
 					toRemove=[ochange.elmParent[change.index]];
 					
-					if(bug) console.log("removing one", ochange.elmParent,  toRemove[0].outerHTML , change.index, [].slice.call(ochange.elmParent).map(function _removeOneConsoleMapper(a){
+					if(bug) console.log("removing one", ochange.elmParent,  toRemove[0].outerHTML , change.index, slice.call(ochange.elmParent).map(function _removeOneConsoleMapper(a){
 						return a.outerHTML || a.nodeValue;						
 					}) , ochange.parent );
 					
@@ -432,22 +445,22 @@ function applyChanges(change, INDEX, ALLS) {
 						if( ind>1 && change.mode==="Z") ind = ind - (change.num-1);						
 						
 						if(bug) console.log("removing many up",  change.mode, ochange.elmParent, ind, ind+change.num);
-						toRemove =[].slice.call(ochange.elmParent, ind, ind+change.num);
+						toRemove =slice.call(ochange.elmParent, ind, ind+change.num);
 						
 					}else{ //count backwards:
-						if(bug) console.log("removing many down",  [].slice.call(ochange.elmParent), change.index-change.num, change.index );
-						toRemove =[].slice.call(ochange.elmParent, (change.index-change.num )+1, (change.index)+1)
+						if(bug) console.log("removing many down",  slice.call(ochange.elmParent), change.index-change.num, change.index );
+						toRemove =slice.call(ochange.elmParent, (change.index-change.num )+1, (change.index)+1)
 					}
 				}				
 			}else{
 				if(bug) console.log("removing many negative",  ochange.elmParent, change.index, change.index+change.num);
-				toRemove=[].slice.call(ochange.elmParent, change.index, change.index+change.num);
+				toRemove=slice.call(ochange.elmParent, change.index, change.index+change.num);
 			}
 
 			if(toRemove.length) change.elm = toRemove[0].parentNode;
 
-			if(bug) console.log("removing:", toRemove, change, ochange.parent.slice( (change.index-change.num )+1, (change.index)+1)) //, [].slice.call(change.elm.childNodes) );
-			toRemove.map(function _toRemover(a) {
+			if(bug) console.log("removing:", toRemove, change, ochange.parent.slice( (change.index-change.num )+1, (change.index)+1)) 
+			forEach(toRemove, function _toRemover(a,b,c) {
 				a.parentNode.removeChild(a);
 			});
 		}
@@ -499,7 +512,8 @@ function getRenderer(dest, vdom, hint) {
 			state.changes = odiff(state.vdom, vdom) ; 
 			state.diffTime= performance.now() - st;
 			st=performance.now();
-			state.changes.forEach(applyChanges, state);
+			//state.changes.forEach(applyChanges, state);
+			forEach(state.changes, applyChanges.bind(state));
 			state.applyTime= performance.now() - st;
 			state.vdom = vdom;
 			return state;
