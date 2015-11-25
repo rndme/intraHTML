@@ -1,7 +1,7 @@
 {
 	"name": "intraHTML",
 	"main": "intrahtml.js",
-	"version": "1.0.2",
+	"version": "1.0.3",
 	"description": "One-shot methods for vanilla and jQuery to make HTML as easy to update as it is to create",
 	"keywords": [
 		"virtual-dom",
