@@ -1,12 +1,12 @@
 # intraHTML
-## makes HTML as easy to update as it is to create
+## makes HTML as easy to live-update as create
 
 ### Usage
 
 `intraHTML(element, strNewInnerHTMLContent);` <br />
 
 #### Install
-donwload, `npm install intrahtml`,  or `bower install intrahtml`
+[donwload](https://raw.githubusercontent.com/rndme/intraHTML/master/intrahtml.min.js), `npm install intrahtml`,  or `bower install intrahtml`
 
 #### Replace the old and busted:
 ` main.innerHTML=myContent; ` <br />
@@ -16,13 +16,13 @@ donwload, `npm install intrahtml`,  or `bower install intrahtml`
 ` intraHTML(main, myContent); ` <br />
 ` $("#main").intraHTML(myContent); `
 
-## Why use it?
-It combines the user-friendliness of data-binding with the flexibility of html string generation.
 
-Setting div.innerHTML with new content destroys form values, selections, scroll positions, and mode. Conversely, generating HTML these days is incredibly fast and convenient with everything from templates like Mustache/Handlbars/Jade, to PHP and it's cornucopia of frameworks. 
-
-If one could simply generate new HTML and show it, apps would be easy to develop. Now, it's easy to do just that. With intraHTML, you can update your entire view without the nasty side-effects. Any and all template systems can seamlessly keep a view updated. 
-
+### Demos
+* The [Info View Demo](http://danml.com/intrahtml/demos/infoview/) reveals the inner-workings of intraHTML
+* The [Performance Demo](http://danml.com/intrahtml/demos/perf/) compares Vanilla, intraHTML, and React
+* The [Github Cards Demo](http://danml.com/intrahtml/demos/githubcards/) uses fetch()+gitHub API+intraHTML
+* The [Todo Demo](http://danml.com/intrahtml/demos/todo/) shows simple MVVC view updating using ES6
+* The [Minimal Investment Demo](http://danml.com/intrahtml/demos/minimal/) is the simplest demo of live dom updating
 
 ### How does it work?
 
@@ -39,6 +39,16 @@ The [infoview demo](http://danml.com/intrahtml/demos/infoview/) makes the parts 
 If you have html that defines 1000 table rows and you change 1 row, only 1 row on the screen will be adjusted, preserving text inputs and selections on the 999 unchanged rows.
 
 
+
+## Why use it?
+It combines the user-friendliness of data-binding with the flexibility of html string generation.
+
+Setting div.innerHTML with new content destroys form values, selections, scroll positions, and mode. Conversely, generating HTML these days is incredibly fast and convenient with everything from templates like Mustache/Handlbars/Jade, to PHP and it's cornucopia of frameworks. 
+
+If one could simply generate new HTML and show it, apps would be easy to develop. Now, it's easy to do just that. With intraHTML, you can update your entire view without the nasty side-effects. Any and all template systems can seamlessly keep a view updated. 
+
+
+
 ### How is intraHTML different than react, vue, deku, angular, and others?
 intraHTML is less dogmatic; it's just a function that updates the DOM with a string, wherever that string might come from. There is no API, no special way of building components, no list of banned libraries or practices, no build process required, and no browser blacklist; even IE8 works with just a generic ES5 polyfill. In short, there's not much to intraHTML, which means less to get in your way, less to learn, and less to worry about.
 
@@ -48,12 +58,6 @@ intraHTML can easily re-render a template and re-sync the DOM at 60FPS on a mode
 
 The [perf demo](http://danml.com/intrahtml/demos/perf/) lets you tests dynamic lists of various sizes.
 
-
-### Got any demos?
-
-* The [Github Cards Demo](http://danml.com/intrahtml/demos/githubcards/) was modeled after a react demo, but uses a lot less code.
-* The [Todo Demo](http://danml.com/intrahtml/demos/todo/) is a todoMVC-ish demo that uses intraHTML for the model display
-* The [Minimal Investment Demo](http://danml.com/intrahtml/demos/minimal/) uses a half-dozen lines to sync view + bundle updates
 
 
 ### Advantages
