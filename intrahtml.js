@@ -12,7 +12,6 @@
   }
 }(this, function intraHTMLFactory (pub) {
 
-
 //   2015-10-22 :: https://github.com/Tixit/odiff - sped up some (typeof vs instanceof), handle sparse arrays better
 if(!Number.isNaN) Number.isNaN = function(value) { return typeof value === "number" && isNaN(value);};
 if (!Array.isArray) Array.isArray = function(arg) { return Object.prototype.toString.call(arg) === '[object Array]';};
