@@ -39,6 +39,21 @@ var elementFromString = function elementFromString(strHTML, containerTagName) {
 if("content" in document.createElement("template")) elementFromString = fragmentFromString;
 
 
+//need to pull from master, rewire these two in, plus the for-loop on apply changes
+function forEach(r,f,v){ 
+	"use strict";
+	if(arguments.length<2) return;
+	var m=r.length, i=0;
+	for (; i<m; i++) f(r[i],i,r);
+}
+
+function filter(r, f) { 
+	"use strict";
+	var m=r.length, o=[], i=0;		
+	for(; i<m; i++) if(f(r[i],i,r)) o.push(r[i]);
+	return o;
+}
+
 
 // given an html element or html string, returns a vdom of that markpup:
 function fromHTML(source, containerTagName) {
@@ -63,22 +78,20 @@ function fromHTML(source, containerTagName) {
 					tag[attr.name] = attr.value;
 				}
 
-
-				tag._ = [];
-				bag.push.apply(tag._, scan(v));
-				if(tag._.length === 0) delete tag._;
+				tag._=scan(v);
 				bag.push(tag);
 
 			} else { //if sub tags? no:			  
 				bag.push(v.nodeValue);
 			}
-		} //);
+		} 
 		return bag;
 	} // end scan()
 
-
+	
 
 	if(typeof source === "string") {
+		if(intraHTML.useParser) return parseHTPure(source);
 		return scan(elementFromString(source, containerTagName))[0];
 	} else {
 		return scan({
@@ -92,14 +105,15 @@ function fromHTML(source, containerTagName) {
 
 
 
-function resolvePath(path, base) {
-	var last = [],
-		out, rxKids = /^_$/;
-	out = path.reduce(function _resolvePathReducer(o, k) {
-		k = ("" + k).replace(rxKids, "childNodes");
-		last.push(o);
-		return o && o[k];
-	}, base);
+function resolvePath(path, base) { 
+	var last = [], i=0, mx =path.length, out=base, u, k;
+        for(i; i<mx; i++){
+		k = path[i];
+		if(k==="_") k="childNodes";
+		last.push(out);
+		out = out[k];
+		if(out===u) break ;
+	};
 	return {
 		node: out,
 		parents: last
@@ -108,12 +122,12 @@ function resolvePath(path, base) {
 
 
 function resolveAll(path, base) {
-	var last = [],
-		out;
-	out = path.reduce(function _resolveAllReducer(o, k) {
-		last.push(o);
-		return o && o[k];
-	}, base);
+	var last = [], i=0, mx =path.length, out=base, u;
+        for(i; i<mx; i++){
+		last.push(out);
+		out = out[path[i]];
+		if(out===u) break ;
+	};
 	return {
 		node: out,
 		parents: last
@@ -124,10 +138,10 @@ var singleTags={area:1,base:1,br:1,col:1,command:1,embed:1,hr:1,img:1,input:1,ke
 
 function toHT(obj) {
 	var attribs = "",
-		str, own = toHT.hasOwnProperty,
-		r = [];
+		str,r = [], own = r.hasOwnProperty;
+		
 
-	if(obj === undefined) return "";
+	if(obj === str) return "";
 
 	// build attribs from values and functions:
 	for(var a in obj) {
@@ -158,23 +172,25 @@ function applyChanges(change, INDEX, ALLS) {
 
 	var startTime = performance.now(),
 	bug = this.debug,
-	path = change.path.concat(change.index || change.key).filter(function(a) {
-		return a != null;
+	path = filter(change.path.concat(change.index || change.key), function _pathFilterer(a, b, c) {
+		return a != b.xsdgdfg;
 	}),
+	slice=path.slice,
 		lastChange = ALLS[INDEX - 1] || "",
-		key = path.filter(function(a) {
-			return a != null;
+		key = filter(path, function _keyFilterer(a, b, c) {
+			return a != b.xsdgdfg;
 		}).slice(-1)[0],
 		elm = resolvePath(path, this.dest),
 		parents = resolveAll(path, this.vdom),
+		elmPar=filter(elm.parents, Boolean),
 		ochange = {
 			type: change.type,
 			index: INDEX,
 			path: path,
 			key: key,
 			elm: elm.node || elm.parents.slice(-1)[0],
-			elmParents: elm.parents.filter(Boolean),
-			elmParent: elm.parents.filter(Boolean).slice(-1)[0],
+			elmParents: elmPar,
+			elmParent: elmPar.slice(-1)[0],
 			dest: this.dest,
 			parents: parents,
 			parent: parents.parents.slice(-1)[0],
@@ -184,37 +200,29 @@ function applyChanges(change, INDEX, ALLS) {
 			isAttrib: !(key - 0.1) && key != "_" && key != "$",
 			change: change
 		};
-		
 
 	if(typeof ochange.elm == "function") ochange.elm = ochange.elmParent;
 	if(bug) console.info("CHANGE: " + INDEX, ochange);
 
-	
-	
-	
 	switch(change.type) {
 
 
 	case "set":
-	
+
 		if(!ochange.isAttrib && (typeof change.val === "string" || Array.isArray(change.val))) {
 
-		
 			var cp=ochange.elm;
-		
 			if(!ochange.elmParent.childNodes) ochange.elmParent = ochange.elmParent[ochange.key];
 			if(!ochange.elm) ochange.elm = ochange.elmParent;
 		
-			var val=change.val;
-			if(!Array.isArray(val)) val=[val];
+			var vals=change.val, val;
+			if(!Array.isArray(vals)) vals=[vals];
 			
-			
-			
-			val.forEach(function(val, i){
+			for(var valIndex=0, maxIndex=vals.length;valIndex<maxIndex;valIndex++){
+				val=vals[valIndex];
 				
 				if(typeof val==="string"){ //add text nodes:
-					
-					if(ochange.elm  instanceof NodeList) ochange.elm = ochange.elmParents.filter(function(a){return a.textContent !== a.fsdhjklghdklg; }).pop();
+					if(ochange.elm  instanceof NodeList) ochange.elm = filter(ochange.elmParents, function _setStrParFinder(a,b,c){return a.textContent !== a.fsdhjklghdklg; }).pop();
 					
 					if(ochange.elm.childNodes) {
 						if(bug) console.log("set: non attrib, string, elm: ", ochange.key,  [val], ochange.elm.outerHTML );
@@ -238,8 +246,6 @@ function applyChanges(change, INDEX, ALLS) {
 								var kids = ochange.elm.childNodes;
 								for(var i = 0, mx = kids.length; i < mx; i++) temp.appendChild(kids[0]);
 								ochange.elm.parentNode.removeChild(ochange.elm);
-								ochange.parent[key] = change.val; //update velm
-
 							}else{
 								ochange.elm.parentNode.insertBefore(content, ochange.elm);
 								ochange.elm.parentNode.removeChild(ochange.elm);
@@ -257,7 +263,7 @@ function applyChanges(change, INDEX, ALLS) {
 				
 					var content = typeof val === "string" ? document.createTextNode(val) : elementFromString(toHT(val), ochange.elmParent[0] && ochange.elmParent[0].parentNode.tagName).firstChild;
 					if(!ochange.elm.parentNode) ochange.elm=ochange.elmParent;
-						var old=ochange.elm.childNodes[+key+i];						
+						var old=ochange.elm.childNodes[+key+valIndex];						
 						if(old){
 							if(bug) console.log("set: non attrib, not string, has old", val );
 							ochange.elm.insertBefore(content, old);
@@ -275,15 +281,10 @@ function applyChanges(change, INDEX, ALLS) {
 					if(!ochange.parent.length) ochange.parent=(ochange.parent._||(ochange.parent._=[]));
 				}
 				
-				if(bug) console.info("attempting key change", +key+i, !!(1.1-key),  key, i, val,  ochange.parent[+key+i], [ochange.parent] );
+				if(bug) console.info("attempting key change", +key+valIndex, !!(1.1-key),  key, valIndex, val,  ochange.parent[+key+valIndex], [ochange.parent] );
 				
-				if( (1.1-key) ){
-					ochange.parent[+key+i] = val; //update velm
-				}else{
-					ochange.parent[key] = val; //update velm
-				}
-				
-			}, this);
+
+			} ;
 			
 			break;
 		}
@@ -293,11 +294,9 @@ function applyChanges(change, INDEX, ALLS) {
 		if(ochange.isAttrib) {
 			if(key == "$" && String(path) == key) throw new TypeError("You cannot change the root element of an update-bound element: " + ochange.elm.outerHTML);
 			if(key == "$") {
-								
 				var temp = document.createElement(change.val);
 				if(bug) console.warn("changing tag name!", change);
 				
-
 				ochange.elm.parentNode.insertBefore(temp, ochange.elm);
 
 				var attrs = ochange.elm.attributes;
@@ -310,7 +309,6 @@ function applyChanges(change, INDEX, ALLS) {
 				change.elm = temp;
 				ochange.elm.parentNode.removeChild(ochange.elm);
 
-				ochange.parent[key] = change.val; //update velm
 
 			} else {
 								
@@ -319,16 +317,14 @@ function applyChanges(change, INDEX, ALLS) {
 				}		
 				
 				var cc;
-				if(!ochange.elm.setAttribute && (cc=ochange.elmParents.filter(function(a){return a.setAttribute}).slice(-1)[0]).setAttribute) {
+				if(!ochange.elm.setAttribute && (cc=filter(ochange.elmParents, function _setParFinderCC(a,b,c){return a.setAttribute}).slice(-1)[0]).setAttribute) {
 					ochange.elm = cc;
 				}		
 				
 				if(change.val===change.dgfjkdfl34534fd){
 					ochange.elm.removeAttribute(key); //update element
-					delete ochange.parent[key];
 				}else{
 					ochange.elm.setAttribute(key, change.val); //update element
-					ochange.parent[key] = change.val; //update velm
 				}
 				
 				change.elm = ochange.elm;
@@ -342,14 +338,10 @@ function applyChanges(change, INDEX, ALLS) {
 		
 		
 		if(ochange.elm.length && change.val === change.sdgfdf ){
-			// remove all the children
-			[].slice.call(ochange.elm).forEach(function(a){
-				a.parentNode.removeChild(a);				
-			});
-			delete ochange.parent[key]; //update velm
+			for(var i6=0, mx6=ochange.elm.length;i6<mx6;i6++) ochange.elm[0].parentNode.removeChild(ochange.elm[0]);				
 		}else{
 			
-			if(ochange.elm instanceof NodeList) ochange.elm= ochange.elmParents.filter(function(a){return a.textContent !== a.fsdhjklghdklg; }).pop();
+			if(ochange.elm instanceof NodeList) ochange.elm= filter(ochange.elmParents,function _setParFinder(a,b,c){return a.textContent !== a.fsdhjklghdklg; }).pop();
 			
 			var temp = elementFromString(toHT(change.val), ochange.parent.$ ).firstChild;
 
@@ -357,9 +349,7 @@ function applyChanges(change, INDEX, ALLS) {
 			change.elm=temp;
 			ochange.elm.parentNode.insertBefore(temp, ochange.elm);
 			ochange.elm.parentNode.removeChild(ochange.elm);
-			ochange.parent[key] = change.val; //update velm
 		}
-				
 		break;
 
 
@@ -371,7 +361,7 @@ function applyChanges(change, INDEX, ALLS) {
 					ochange.parent = ochange.parent._;
 					ochange.elmParent = ochange.elmParent.childNodes;
 				}
-			change.vals.forEach(function _valUpdater(val, i) {
+			forEach(change.vals, function _valUpdater(val, i, arrWhole) {
 
 				if(!ochange.elmParent.length) ochange.elmParent = ochange.elmParents.slice(-1)[0].childNodes;
 				if(!ochange.elmParent) ochange.elmParent = ochange.elmParents.slice(-2)[0].childNodes;
@@ -392,7 +382,7 @@ function applyChanges(change, INDEX, ALLS) {
 						if(it[0]) it = it[it.length-1];
 						if(ochange.elm && ochange.elm.length>=ochange.key) it=ochange.elm[0].parentNode;
 						
-						if(it instanceof NodeList) it= ochange.elmParents.filter(function(a){return a.textContent !== a.fsdhjklghdklg; }).pop();
+						if(it instanceof NodeList) it= filter(ochange.elmParents,function _addParFinder(a,b,c){return a.textContent !== a.fsdhjklghdklg; }).pop();
 						
 						if(it !== content) {
 							if(it.nodeType != 3) {
@@ -403,7 +393,6 @@ function applyChanges(change, INDEX, ALLS) {
 							}
 						}
 					}
-					ochange.parent.splice(ochange.key + i + 0, 0, val);
 				}
 			});
 
@@ -422,17 +411,14 @@ function applyChanges(change, INDEX, ALLS) {
 		// list out what to remove:
 		var min = change.index - change.num,
 			max = change.index,
-		 toRemove = [].slice.call(ochange.elmParent, min + 1, max + 1);
+		 toRemove = slice.call(ochange.elmParent, min + 1, max + 1);
 
-		 var recon=Boolean;
-					
 		if(change.index === 0) { // it starts at zero, the odiff range goes positive instead of couring backwards from 0:
 			
-			if(bug) console.log("removing many from zero",  [].slice.call(ochange.parent), ochange.elmParent,"|||", ochange.parent[0], change.index, change.num );
+			if(bug) console.log("removing many from zero",  slice.call(ochange.parent), ochange.elmParent,"|||", ochange.parent[0], change.index, change.num );
 			
 			for(var i = change.index, mx = i + change.num; i < mx; i++) {
 				ochange.elmParent[change.index].remove();
-				ochange.parent.splice(change.index, 1);
 			}
 			change.elm = ochange.elmParent;
 		} else {
@@ -445,11 +431,9 @@ function applyChanges(change, INDEX, ALLS) {
 					
 					toRemove=[ochange.elmParent[change.index]];
 					
-					if(bug) console.log("removing one", ochange.elmParent,  toRemove[0].outerHTML , change.index, [].slice.call(ochange.elmParent).map(function(a){
+					if(bug) console.log("removing one", ochange.elmParent,  toRemove[0].outerHTML , change.index, slice.call(ochange.elmParent).map(function _removeOneConsoleMapper(a){
 						return a.outerHTML || a.nodeValue;						
 					}) , ochange.parent );
-					
-					recon=function(){ ochange.parent.splice( change.index, 1);		 };
 					
 				}else{
 					
@@ -459,36 +443,27 @@ function applyChanges(change, INDEX, ALLS) {
 						if( ind>1 && change.mode==="Z") ind = ind - (change.num-1);						
 						
 						if(bug) console.log("removing many up",  change.mode, ochange.elmParent, ind, ind+change.num);
-						toRemove =[].slice.call(ochange.elmParent, ind, ind+change.num);
-						recon=function(){ochange.parent.splice( ind, change.num);			}
+						toRemove =slice.call(ochange.elmParent, ind, ind+change.num);
 						
 					}else{ //count backwards:
-						if(bug) console.log("removing many down",  [].slice.call(ochange.elmParent), change.index-change.num, change.index );
-						toRemove =[].slice.call(ochange.elmParent, (change.index-change.num )+1, (change.index)+1)
-						recon=function(){ ochange.parent.splice( (change.index-change.num )+1 , change.num);		 };
+						if(bug) console.log("removing many down",  slice.call(ochange.elmParent), change.index-change.num, change.index );
+						toRemove =slice.call(ochange.elmParent, (change.index-change.num )+1, (change.index)+1)
 					}
-					
 				}				
-				
 			}else{
-			//	if(bug) console.log("removing many negative",  ochange.elmParent, change.index, change.index+change.num);
-				toRemove=[].slice.call(ochange.elmParent, change.index, change.index+change.num);
-				recon=function(){ ochange.parent.splice( change.index, change.num);	 };
+				if(bug) console.log("removing many negative",  ochange.elmParent, change.index, change.index+change.num);
+				toRemove=slice.call(ochange.elmParent, change.index, change.index+change.num);
 			}
 
 			if(toRemove.length) change.elm = toRemove[0].parentNode;
 
-			if(bug) console.log("removing:", toRemove, change, ochange.parent.slice( (change.index-change.num )+1, (change.index)+1)) //, [].slice.call(change.elm.childNodes) );
-			
-			toRemove.map(function(a) {
+			if(bug) console.log("removing:", toRemove, change, ochange.parent.slice( (change.index-change.num )+1, (change.index)+1)) 
+			forEach(toRemove, function _toRemover(a,b,c) {
 				a.parentNode.removeChild(a);
 			});
-			recon();
 		}
-		
 		break;
 	}
-
 	change.runtime = performance.now() - startTime;
 
 } //end applyChanges() 
@@ -532,11 +507,13 @@ function getRenderer(dest, vdom, hint) {
 			state.parseTime= (performance.now() - st);			
 			state.vdom2 = vdom;
 			st=performance.now();
-			state.changes = odiff2(state.vdom, vdom) ; 
+			state.changes = odiff(state.vdom, vdom) ; 
 			state.diffTime= performance.now() - st;
 			st=performance.now();
-			state.changes.forEach(applyChanges, state);
+			//state.changes.forEach(applyChanges, state);
+			forEach(state.changes, applyChanges.bind(state));
 			state.applyTime= performance.now() - st;
+			state.vdom = vdom;
 			return state;
 		}
 	};
@@ -545,11 +522,113 @@ function getRenderer(dest, vdom, hint) {
 }
 
 
-  
+
+
+
+function parseHTPure(html) {
+	"use strict";
+	var out = {
+		$: "ROOT",
+		_: []
+	},
+	parent = out,
+	out2 = out,
+	rxQuoteOpen = /^['"]/,
+	rxQuoteClose = /['"]$/,
+	rxBooleanAttrib = /\s+[\w\-]+$/,
+	rxWhite = /\s+/,
+	rxAttrVal = /^[\w\-]+/,
+	rxAttribValQ = /^"[^"]*"/,
+	rxAttribValA = /^'[^']*'/,
+	rxTagNameEnd = /[\s>]/,
+	tag = {},
+	heap = html.split(/([<>])/),
+	last = "",
+	hint,
+	token,
+	index = 0,
+	mx2 = heap.length,
+	name, 
+	r,
+	lastSegment,
+	b = 1,
+	mx,
+	a,
+	cap,
+	val, key,
+	attrValue,
+	parents = [out],
+	overlap;
+
+	for(; index < mx2; index++) {
+		token = heap[index];
+		hint = token.slice(0, 1);
+		if(last === "<" && hint === "/") {
+			tag = parents.pop();
+			out = tag;
+			last = "";
+			continue;
+		}
+		if(last === "<") {
+			name = token.split(rxTagNameEnd)[0],
+			r = token.slice(name.length + 1).trim().split("="),
+			lastSegment = r[0].trim();
+			parents.push(out);
+			out._.push(tag = {
+				$: name,
+				_: []
+			});
+
+
+			lastSegment=r[0].trim();
+			
+			for(b = 1, mx = r.length; b < mx; b++) {
+				a = r[b].trim();			
+
+				switch(a.slice(0,1)){
+				 case "'": attrValue = a.match(rxAttribValA)[0]; break;
+				 case '"':  attrValue = a.match(rxAttribValQ)[0]; break;
+				 default:   attrValue = a.match(rxAttrVal)[0];
+				}
+				
+
+				if(rxTagNameEnd.test(lastSegment)) {
+					lastSegment = lastSegment.split(rxWhite);
+					tag[lastSegment[0]] = "";
+					lastSegment = lastSegment[1];
+				}
+				tag[lastSegment] = attrValue.trim().replace(rxQuoteOpen, "").replace(rxQuoteClose, "");
+				lastSegment = a.slice(attrValue.length + 1);
+			}
+
+
+			if(out != tag) parent = out;
+			out = tag;
+			last = token;
+			continue;
+		}
+		if(token && !(token === "<" || token === ">") && tag._) tag._.push(token);
+		last = token;
+	}
+
+	return out2._[0];
+}
+
+
+
+
+
+
+
   
   function intraHTML(elm, content){
 	 return intraHTML._last=getRenderer(elm, elm, content),  intraHTML._last.update(content);
   } 
+  
+  
+  
+  intraHTML.useParser=true;
+  
   
   intraHTML.odiff=odiff;
   intraHTML.updater=getRenderer;
@@ -557,14 +636,16 @@ function getRenderer(dest, vdom, hint) {
   intraHTML.toHTML = toHT;
   intraHTML.fromHTML = fromHTML;
   intraHTML.elementFromString=elementFromString;
+  intraHTML.parseHT=parseHTPure;
   
   intraHTML.getRenderer = getRenderer;
  // jQuery plugin:
   if(pub.jQuery) pub.jQuery.fn.intraHTML=function(strContent){
-     this.each(function(i,e){ intraHTML(e, strContent);});
+     this.each(function jqiht(i,e){ intraHTML(e, strContent);});
    return this;
   };
   
   return intraHTML;
   
 }));
+ 
