@@ -114,13 +114,9 @@ function parseHT(html) {
 	out2 = out,
 	rxQuoteOpen = /^['"]/,
 	rxQuoteClose = /['"]$/,
-	rxBooleanAttrib =/([\w\-]+)()/g  ,
 	rxWhite = /\s+/,
-	rxAttrVal = /([\w\-]+)=([^\s>\/]+)/g,
-	rxAttribValQ = /([\w\-]+)="([^"]*)"/g,
-	rxAttribValA = /([\w\-]+)='([^']*)'/g,
 	rxTagNameEnd = /[\s>]/, 
-	tag = {},
+	tag = out,
 	heap = html.split(/([<>])/),
 	last = "",
 	hint,
@@ -131,7 +127,7 @@ function parseHT(html) {
 	r,
 	b = 1,
 	mx,
-	a,
+	a, n,
 	strAttribs,
 	cap,
 	val,
@@ -139,25 +135,35 @@ function parseHT(html) {
 	attrValue,
 	parents = [out],
 	overlap,
+	rxBooleanAttrib =/([\w\-]+)()/g  ,
+	rxAttrVal = /([\w\-]+)=([^\s>\/]+)/g,
+	rxAttribValQ = /([\w\-]+)="([^"]*)"/g,
+	rxAttribValA = /([\w\-]+)='([^']*)'/g,
 	rxs=[rxAttribValQ, rxAttribValA, rxAttrVal, rxBooleanAttrib];
+	function fnReppr(j, k, v, x, y){ tag[k]=v || ""; return "";   }
 
 	// loop through all tag opening and closing tags in a flattened array:
 	for(; index < mx2; index++) {
 		token = heap[index];
 		hint = token.slice(0, 1);
 		
-		// handle closing tags: (return to parent, clear buffer);
-		if(last === "<" && hint === "/") {
-			tag = parents.pop();
-			out = tag;
-			last = "";
-			continue;
-		}
 		
-		//handle opening tags by making new tag object and adding attribs and kids
-		if(last === "<") {
-			name = token.split(rxTagNameEnd)[0];			// tag name from left side
-			strAttribs= token.slice(name.length);
+		if(last === "<"){
+
+			if(hint === "/") { // handle closing tags: (return to parent, clear buffer);
+				tag = parents.pop();
+				out = tag;
+				last = "";
+				continue;
+			}
+		
+		
+			// handle opening tags by making new tag object and adding attribs and kids
+
+			n=token.search(rxTagNameEnd);
+			if(n===-1) n = 20;
+			name=token.slice(0, n);
+			strAttribs= token.slice(n);
 			
 			// save old tag to parent children collection:
 			parents.push(out);	
@@ -170,9 +176,8 @@ function parseHT(html) {
 
 
 			// add attribs:			
-			if(strAttribs) for(b=0; b<4; b++)  strAttribs=strAttribs.replace(rxs[b], function(j, k, v){ tag[k]=v || ""; return "";   });
+			if(strAttribs) for(b=0; b<4; b++)  strAttribs=strAttribs.replace(rxs[b], fnReppr );
 
-				// needed ? 
 			if(singleTags[name]){
 				last=token;
 				tag = parents.pop();
@@ -181,14 +186,14 @@ function parseHT(html) {
 			}
 				
 			// move "cursor" to this new tag:
-			if(out != tag) parent = out;
+			if(out !== tag) parent = out;
 			out = tag;
 			last = token;
 			continue;
 		}// end if tag opening?
 
 		//if not tag open or close, must be content, add to cursor tag:
-		if(token && !(token === "<" || token === ">") && tag._) tag._.push(token);
+		if(token && !(token === "<" || token === ">") ) tag._.push(token);
 		
 		// memorize current value for parser peek-behind to find closing tags:
 		last = token;
@@ -196,6 +201,7 @@ function parseHT(html) {
 
 	return out2._[0];
 }//end parseHT()
+
 
 
 
@@ -261,11 +267,11 @@ function toHT(obj) {
 
 
 //given a change array, applies the changes to the element that's rendering the vdom:  
-function applyChanges(change, INDEX, ALLS) {
+function applyChanges(change, INDEX, ALLS, that) {
 
-	var time = this.timing,
+	var time = that.timing,
 		startTime = time ? performance.now() : 0,
-		bug = this.debug,
+		bug = that.debug,
 		path = filter(change.path.concat(change.index || change.key), function _pathFilterer(a, b, c) {
 			return a != b.xsdgdfg;
 		}),
@@ -274,8 +280,8 @@ function applyChanges(change, INDEX, ALLS) {
 		key = filter(path, function _keyFilterer(a, b, c) {
 			return a != b.xsdgdfg;
 		}).slice(-1)[0],
-		elm = resolvePath(path, this.dest),
-		parents = resolveAll(path, this.vdom),
+		elm = resolvePath(path, that.dest),
+		parents = resolveAll(path, that.vdom),
 		elmPar = filter(elm.parents, Boolean),
 		ochange = {
 			type: change.type,
@@ -285,7 +291,7 @@ function applyChanges(change, INDEX, ALLS) {
 			elm: elm.node || elm.parents.slice(-1)[0],
 			elmParents: elmPar,
 			elmParent: elmPar.slice(-1)[0],
-			dest: this.dest,
+			dest: that.dest,
 			parents: parents,
 			parent: parents.parents.slice(-1)[0],
 			isAttrib: !(key - 0.1) && key != "_" && key != "$",
@@ -595,7 +601,7 @@ function getRenderer(dest, vdom, hint) {
 		timing : intraHTML.timing,
 		initTime: st-it,
 		update: function(vdom) {
-			var blnTime=intraHTML.timing, st;
+			var blnTime=intraHTML.timing, st, i=0, mx;
 			if(blnTime) st=performance.now();
 			if(typeof vdom === "string") 	vdom = fromHTML(head + vdom + "</" + tag + ">", tag);
 			if(blnTime) state.parseTime= (performance.now() - st);			
@@ -606,7 +612,7 @@ function getRenderer(dest, vdom, hint) {
 				state.diffTime= performance.now() - st;
 				st=performance.now();
 			}
-			forEach(state.changes, applyChanges.bind(state));
+			for(mx=state.changes.length;i<mx;i++)	applyChanges(state.changes[i], i, state.changes, state);
 			if(blnTime) state.applyTime= performance.now() - st;
 			state.vdom = vdom;
 			return state;
