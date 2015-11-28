@@ -114,12 +114,12 @@ function parseHT(html) {
 	out2 = out,
 	rxQuoteOpen = /^['"]/,
 	rxQuoteClose = /['"]$/,
-	rxBooleanAttrib = /\s+[\w\-]+$/,
+	rxBooleanAttrib =/([\w\-]+)()/g  ,
 	rxWhite = /\s+/,
-	rxAttrVal = /^[\w\-]+/,
-	rxAttribValQ = /^"[^"]*"/,
-	rxAttribValA = /^'[^']*'/,
-	rxTagNameEnd = /[\s>]/,
+	rxAttrVal = /([\w\-]+)=([^\s>\/]+)/g,
+	rxAttribValQ = /([\w\-]+)="([^"]*)"/g,
+	rxAttribValA = /([\w\-]+)='([^']*)'/g,
+	rxTagNameEnd = /[\s>]/, 
 	tag = {},
 	heap = html.split(/([<>])/),
 	last = "",
@@ -129,16 +129,17 @@ function parseHT(html) {
 	mx2 = heap.length,
 	name,
 	r,
-	lastSegment,
 	b = 1,
 	mx,
 	a,
+	strAttribs,
 	cap,
 	val,
 	key,
 	attrValue,
 	parents = [out],
-	overlap;
+	overlap,
+	rxs=[rxAttribValQ, rxAttribValA, rxAttrVal, rxBooleanAttrib];
 
 	// loop through all tag opening and closing tags in a flattened array:
 	for(; index < mx2; index++) {
@@ -155,9 +156,8 @@ function parseHT(html) {
 		
 		//handle opening tags by making new tag object and adding attribs and kids
 		if(last === "<") {
-			name = token.split(rxTagNameEnd)[0],			// tag name from left side
-			r = token.slice(name.length + 1).trim().split("="),	// array of attribs (boolean attribs are not separated here)
-			lastSegment = r[0].trim();	// first attrib name
+			name = token.split(rxTagNameEnd)[0];			// tag name from left side
+			strAttribs= token.slice(name.length);
 			
 			// save old tag to parent children collection:
 			parents.push(out);	
@@ -168,33 +168,18 @@ function parseHT(html) {
 				_: []
 			});
 
-			// find and add attribs:
-			for(b = 1, mx = r.length; b < mx; b++) {
-				a = r[b].trim();
 
-				//how is the attrib encoded in the HTML?
-				switch(a.slice(0, 1)) {
-				case "'":	// using apos as quoted value
-					attrValue = a.match(rxAttribValA)[0];
-					break;
-				case '"': 	// using quote as quoted value
-					attrValue = a.match(rxAttribValQ)[0];
-					break;
-				default:		// no quoted value, must be bare or boolean
-					attrValue = a.match(rxAttrVal)[0];
-				}
+			// add attribs:			
+			if(strAttribs) for(b=0; b<4; b++)  strAttribs=strAttribs.replace(rxs[b], function(j, k, v){ tag[k]=v || ""; return "";   });
 
-				// find/fix boolean attribs collated into a single attrib value:
-				if(rxTagNameEnd.test(lastSegment)) {
-					lastSegment = lastSegment.split(rxWhite);
-					tag[lastSegment[0]] = "";
-					lastSegment = lastSegment[1];
-				}
-
-				tag[lastSegment] = attrValue.trim().replace(rxQuoteOpen, "").replace(rxQuoteClose, "");
-				lastSegment = a.slice(attrValue.length + 1);
-			} // next attrib
-
+				// needed ? 
+			if(singleTags[name]){
+				last=token;
+				tag = parents.pop();
+				out = tag;
+				continue; 
+			}
+				
 			// move "cursor" to this new tag:
 			if(out != tag) parent = out;
 			out = tag;
@@ -657,4 +642,3 @@ function getRenderer(dest, vdom, hint) {
   return intraHTML;
   
 }));
- 
