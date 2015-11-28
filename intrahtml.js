@@ -567,21 +567,27 @@ function applyChanges(change, INDEX, ALLS) {
 
 function getRenderer(dest, vdom, hint) {
 
-	var it = intraHTML.timing ? performance.now() : 0;
 	if(typeof dest === "string") dest = document.querySelector(dest);
 	
-	var str = dest.outerHTML,
-		head = str.slice(0, str.indexOf(">")) + ">",
-		inner=str.slice(head.length, str.lastIndexOf("<")-1),
-		tag = head.match(/^<[\w\-]+/)[0].slice(1).toLowerCase();
-		
-	if(hint && hint.trim()===inner.trim()) return {update: Boolean};
-	if(!inner) inner = dest.innerHTML = " ";
-	if(!vdom) vdom = str;
+	var it= intraHTML.timing ? performance.now() : 0,		
+	tag=dest.tagName.toLowerCase(), 
+	head="<"+tag+">", 
+	ht, st, state;
 	
-	if(vdom instanceof Element || typeof vdom === "string" ) vdom = fromHTML(vdom, tag);
+	if(!dest.childNodes.length) dest.innerHTML = " ";
 
-	var st= intraHTML.timing ? performance.now() : 0,
+	if(!vdom) vdom = dest;
+	
+	if(vdom instanceof Element){
+		ht=vdom.innerHTML;
+		if(hint === ht) return {update: Boolean};
+		vdom = fromHTML(head + ht + "</" + tag + ">", tag); // actually faster using outerHTML than feeding it a dom node (dest, which works). confirm that widely...
+	}
+	
+	if(typeof vdom === "string" ) vdom = fromHTML(vdom, tag);
+
+	st= intraHTML.timing ? performance.now() : 0;
+	
 	state = {
 		dest: dest,
 		vdom: vdom,
@@ -595,7 +601,7 @@ function getRenderer(dest, vdom, hint) {
 			if(blnTime) state.parseTime= (performance.now() - st);			
 			state.vdom2 = vdom;
 			if(blnTime) st=performance.now();
-			state.changes = odiff(state.vdom, vdom) ; 
+			state.changes = odiff(state.vdom, vdom);
 			if(blnTime){
 				state.diffTime= performance.now() - st;
 				st=performance.now();
