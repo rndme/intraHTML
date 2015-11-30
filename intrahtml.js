@@ -92,8 +92,7 @@ function fromHTML(source, containerTagName) {
 
 
 	if(typeof source === "string") {
-		if(intraHTML.useParser) return parseHT(source);
-		return scan(elementFromString(source, containerTagName))[0]; // for now
+		return parseHT(source);
 	} else {
 		return scan({
 			tagName: containerTagName||"div",
@@ -103,6 +102,15 @@ function fromHTML(source, containerTagName) {
 	}
 
 } //end fromHTML
+
+var entities={'&quot;':'"', '&amp;':"&", '&lt;':'<', '&gt;': '>', '&apos;': "'"};
+("nbsp,iexcl,cent,pound,curren,yen,brvbar,sect,uml,copy,ordf,laquo,not,shy,reg,macr,deg,plusmn,sup2,sup3,acute,micro,para,middot,cedil,sup1,ordm,raquo,"+
+"frac14,frac12,frac34,iquest,Agrave,Aacute,Acirc,Atilde,Auml,Aring,AElig,Ccedil,Egrave,Eacute,Ecirc,Euml,Igrave,Iacute,Icirc,Iuml,ETH,Ntilde,Ograve,Oacute,"+
+"Ocirc,Otilde,Ouml,times,Oslash,Ugrave,Uacute,Ucirc,Uuml,Yacute,THORN,szlig,agrave,aacute,acirc,atilde,auml,aring,aelig,ccedil,egrave,eacute,ecirc,euml,"+
+"igrave,iacute,icirc,iuml,eth,ntilde,ograve,oacute,ocirc,otilde,ouml,divide,oslash,ugrave,uacute,ucirc,uuml,yacute,thorn,yuml").split(",").forEach(function(a,b,c){
+   this["&"+a+";"]= String.fromCharCode(160+b);
+}, entities);
+
 
 
 function parseHT(html) {
@@ -194,7 +202,9 @@ function parseHT(html) {
 		}// end if tag opening?
 
 		//if not tag open or close, must be content, add to cursor tag:
-		if(token && !(token === "<" || token === ">") ) tag._.push(token);
+		if(token && !(token === "<" || token === ">") ) tag._.push( token.indexOf("&") === -1 ? token : token.replace(/(&\w+;)/g, function(j, a){
+			return entities[a] || a;
+		}));
 		
 		// memorize current value for parser peek-behind to find closing tags:
 		last = token;
@@ -645,6 +655,7 @@ function getRenderer(dest, vdom, hint) {
   //publish external options:
   intraHTML.timing = true;
   intraHTML.debug = false;  
+  intraHTML.entities =entities;
   
  // jQuery plugin:
   if(pub.jQuery) pub.jQuery.fn.intraHTML=function(strContent){
