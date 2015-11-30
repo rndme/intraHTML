@@ -92,7 +92,8 @@ function fromHTML(source, containerTagName) {
 
 
 	if(typeof source === "string") {
-		return parseHT(source);
+		if(intraHTML.blnParser) return parseHT(source);
+		return scan(elementFromString(source, containerTagName))[0];
 	} else {
 		return scan({
 			tagName: containerTagName||"div",
@@ -151,6 +152,7 @@ function parseHT(html) {
 	rxAttrVal = /([\w\-]+)=([^\s>\/]+)/g,
 	rxAttribValQ = /([\w\-]+)="([^"]*)"/g,
 	rxAttribValA = /([\w\-]+)='([^']*)'/g,
+	rxEntity = /(&\w+;)/g,
 	rxs=[rxAttribValQ, rxAttribValA, rxAttrVal, rxBooleanAttrib];
 	function fnReppr(j, k, v, x, y){ tag[k]=v || ""; return "";   }
 
@@ -205,7 +207,7 @@ function parseHT(html) {
 		}// end if tag opening?
 
 		//if not tag open or close, must be content, add to cursor tag:
-		if(token && !(token === "<" || token === ">") ) tag._.push( token.indexOf("&") === -1 ? token : token.replace(/(&\w+;)/g, function(j, a){
+		if(token && !(token === "<" || token === ">") ) tag._.push( token.indexOf("&") === -1 ? token : token.replace(rxEntity, function(j, a){
 			return entities[a] || a;
 		}));
 		
@@ -589,7 +591,7 @@ function getRenderer(dest, vdom, hint) {
 
 	if(typeof dest === "string") dest = document.querySelector(dest);
 	
-	var it= intraHTML.timing ? performance.now() : 0,		
+	var it= intraHTML.blnTiming ? performance.now() : 0,		
 	tag=dest.tagName.toLowerCase(), 
 	head="<"+tag+">", 
 	ht, st, state;
@@ -599,23 +601,23 @@ function getRenderer(dest, vdom, hint) {
 	if(!vdom) vdom = dest;
 	
 	if(vdom instanceof Element){
-		ht=vdom.innerHTML;
+		ht=vdom.innerHTML.replace(/<\!\-\-[\s\S]+?\-\->/g,"");
 		if(hint === ht) return {update: Boolean};
 		vdom = fromHTML(head + ht + "</" + tag + ">", tag); // actually faster using outerHTML than feeding it a dom node (dest, which works). confirm that widely...
 	}
 	
 	if(typeof vdom === "string" ) vdom = fromHTML(vdom, tag);
 
-	st= intraHTML.timing ? performance.now() : 0;
+	st= intraHTML.blnTiming ? performance.now() : 0;
 	
 	state = {
 		dest: dest,
 		vdom: vdom,
-		debug: intraHTML.debug, 
-		timing : intraHTML.timing,
+		debug: intraHTML.blnDebug, 
+		timing : intraHTML.blnTiming,
 		initTime: st-it,
 		update: function(vdom) {
-			var blnTime=intraHTML.timing, st, i=0, mx;
+			var blnTime=intraHTML.blnTiming, st, i=0, mx;
 			if(blnTime) st=performance.now();
 			if(typeof vdom === "string") 	vdom = fromHTML(head + vdom + "</" + tag + ">", tag);
 			if(blnTime) state.parseTime= (performance.now() - st);			
@@ -646,21 +648,19 @@ function getRenderer(dest, vdom, hint) {
   } 
   
   // publish useful internal helper methods:
-  intraHTML.applyChanges = applyChanges;
-  intraHTML.elementFromString=elementFromString;
-  intraHTML.fromHTML = fromHTML;
-  intraHTML.toHTML = toHT;
-  intraHTML.odiff=odiff;
-  intraHTML.parseHTML=parseHT;  
-  intraHTML.updater=getRenderer;
-  intraHTML.getRenderer = getRenderer;
+  intraHTML.elementFromString=elementFromString;	// browser-baser parser turns elements into vdom objects
+  intraHTML.fromHTML = fromHTML;	// uses a string or browser-based parser to turn an html string into a vdom object
+  intraHTML.parseHTML=parseHT;  		// string-based parser  turns HTML strings into vdom objects
+  intraHTML.toHTML = toHT;				// turns a vdom object into an HTML string
+  intraHTML.odiff=odiff;				// the internal differ used by intraHTML, exposed for testing and general use if desired, dirty checking for example
+  intraHTML.updater=getRenderer; // returns a function that accepts HTML to update the view with. faster, but expects DOM not to change between updates.
   
   //publish external options:
-  intraHTML.timing = true;
-  intraHTML.debug = false;  
-  intraHTML.entities =entities;
+  intraHTML.blnTiming = false;	// enable to gather performance information about parsing, diffing, and applying dom updates
+  intraHTML.blnDebug = false;  	// enable to dump detailed info to the console for debugging 
+  intraHTML.blnParser= true; 		// disable if you have specialized HTML markup with namespaces, funky attribs, or invalid nesting. ~10X slower parsing when disabled.
   
- // jQuery plugin:
+ // publish jQuery plugin: (if applicable)
   if(pub.jQuery) pub.jQuery.fn.intraHTML=function(strContent){
      this.each(function jqiht(i,e){ intraHTML(e, strContent);});
    return this;
