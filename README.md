@@ -31,7 +31,7 @@
 ### Useful Helper Methods
 #### intraHTML exposes a few "static methods"  
 `updater(elmDest, objVDOM)`	returns a function that accepts HTML to update the view with.<br />
-`elementFromString(strHTML)`	browser-baser parser turns elements into vdom objects <br />
+`elementFromString(strHTML)`	browser-based parser turns elements into vdom objects <br />
 `fromHTML(source, containerTagName)`	quickly parses an html string or DOM element into a vdom object <br />
 `parseHTML(strHTML)`	string-based parser  turns HTML strings into vdom objects<br />
 `toHTML(objVDOM)`		turns a vdom object into an HTML string<br />
