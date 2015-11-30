@@ -27,6 +27,23 @@
 * The [Todo Demo](http://danml.com/intrahtml/demos/todo/) shows simple MVVC view updating using ES6
 * The [Minimal Investment Demo](http://danml.com/intrahtml/demos/minimal/) is the simplest demo of live dom updating
 
+
+### Useful Helper Methods:
+intraHTML exposes a few "static methods" you might find handy:
+
+`elementFromString(strHTML)`	browser-baser parser turns elements into vdom objects <br />
+`fromHTML(source, containerTagName)`	uses a string or browser-based parser to turn an html string or DOM element into a vdom object<br />
+`parseHTML(strHTML)`	string-based parser  turns HTML strings into vdom objects<br />
+`toHTML(objVDOM)`		turns a vdom object into an HTML string<br />
+`odiff(a,b)`	the internal differ used by intraHTML, exposed for testing and general use if desired, dirty checking for exampl<br />
+`updater(elmDest, objVDOM)`	returns a function that accepts HTML to update the view with. faster, but expects DOM not to change between updates.<br />
+  
+### Options (defaults):
+`blnTiming` 	(false)	enable to gather performance information about parsing, diffing, and applying dom updates<br />
+`blnDebug`  	(false)	enable to dump detailed info to the console for debugging <br />
+`blnParser`	(true)	disable (10x slower) for compat w/ HTML namespaces, funky attribs, or invalid nesting.
+
+
 ### How does it work?
 
 For a div with 1 sub-tag: `<div id="d"><br></div>` suppose we call `intraHTML(d,"<hr />");` : 
