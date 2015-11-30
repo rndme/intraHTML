@@ -59,7 +59,7 @@ intraHTML is less dogmatic; it's just a function that updates the DOM with a str
 ### Is it fast?
 intraHTML can easily re-render a template and re-sync the DOM at 60FPS on a modest ultrabook. DOM updates are applied at about the same rate as react. Views comprised of hundreds of elements are typically DIFFed in less than a millisecond. While a heavy-investment setup like React will likely scale better to huge interfaces (10,000+ elements), for most real-world applications, intraHTML's updates occur well-within human expectations.
 
-The [perf demo](http://danml.com/intrahtml/demos/perf/) lets you tests dynamic lists of various sizes.
+The [perf demo](http://danml.com/intrahtml/demos/perf/) lets you compare many approaches, including react and vanilla.
 
 
 
