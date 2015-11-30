@@ -115,6 +115,9 @@ var entities={'&quot;':'"', '&amp;':"&", '&lt;':'<', '&gt;': '>', '&apos;': "'"}
 
 function parseHT(html) {
 	"use strict";
+	
+	html=String(html).replace(/<\!\-\-[\s\S]+?\-\->/g,"");
+	
 	var out = {
 		$: "ROOT",
 		_: []
