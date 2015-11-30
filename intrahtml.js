@@ -92,7 +92,8 @@ function fromHTML(source, containerTagName) {
 
 
 	if(typeof source === "string") {
-		return parseHT(source);
+		if(intraHTML.useParser) return parseHT(source);
+		return scan(elementFromString(source, containerTagName))[0]; // for now
 	} else {
 		return scan({
 			tagName: containerTagName||"div",
