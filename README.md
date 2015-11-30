@@ -28,17 +28,17 @@
 * The [Minimal Investment Demo](http://danml.com/intrahtml/demos/minimal/) is the simplest demo of live dom updating
 
 
-### Useful Helper Methods:
-intraHTML exposes a few "static methods" you might find handy:
-
+### Useful Helper Methods
+#### intraHTML exposes a few "static methods"  
+`updater(elmDest, objVDOM)`	returns a function that accepts HTML to update the view with.<br />
 `elementFromString(strHTML)`	browser-baser parser turns elements into vdom objects <br />
-`fromHTML(source, containerTagName)`	uses a string or browser-based parser to turn an html string or DOM element into a vdom object<br />
+`fromHTML(source, containerTagName)`	quickly parses an html string or DOM element into a vdom object <br />
 `parseHTML(strHTML)`	string-based parser  turns HTML strings into vdom objects<br />
 `toHTML(objVDOM)`		turns a vdom object into an HTML string<br />
-`odiff(a,b)`	the internal differ used by intraHTML, exposed for testing and general use if desired, dirty checking for exampl<br />
-`updater(elmDest, objVDOM)`	returns a function that accepts HTML to update the view with. faster, but expects DOM not to change between updates.<br />
+`odiff(a,b)`	internal differ used on VDOMs by intraHTML, for testing and general use, ex: dirty checking<br />
+
   
-### Options (defaults):
+### Options (defaults)
 `blnTiming` 	(false)	enable to gather performance information about parsing, diffing, and applying dom updates<br />
 `blnDebug`  	(false)	enable to dump detailed info to the console for debugging <br />
 `blnParser`	(true)	disable (10x slower) for compat w/ HTML namespaces, funky attribs, or invalid nesting.
