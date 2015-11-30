@@ -53,7 +53,7 @@ If one could simply generate new HTML and show it, apps would be easy to develop
 
 
 ### How is intraHTML different than react, vue, deku, angular, and others?
-intraHTML is less dogmatic; it's just a function that updates the DOM with a string, wherever that string might come from. There is no API, no special way of building components, no list of banned libraries or practices, no build process required, and no browser blacklist; even IE8 works with just a generic ES5 polyfill. In short, there's not much to intraHTML, which means less to get in your way, less to learn, and less to worry about.
+intraHTML is far simpler; it's just a function that updates the DOM with a string, wherever that string might come from. There is no API - just HTML itself, there's no special way of building components, no list of banned plugins or practices, no build process, and no browser blacklist; even IE8 works with just a generic ES5 polyfill. In short, there's not much to intraHTML, which means less to get in your way, less to learn, and less to worry about. Feed output into intraHTML and enjoy user-friendly live view updates without any dom-pointing CSS selectors or data binding; it really is magical.
 
 
 ### Is it fast?
