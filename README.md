@@ -1,6 +1,9 @@
 # intraHTML
 ## makes HTML as easy to live-update as create
 
+#### incremental view updates using virtual-DOM DIFFs and live DOM patching
+
+
 ### Usage
 
 `intraHTML(element, strNewInnerHTMLContent);` <br />
