@@ -114,15 +114,13 @@ var entities={'&quot;':'"', '&amp;':"&", '&lt;':'<', '&gt;': '>', '&apos;': "'"}
 
 
 
-function parseHT(html) {
+function parseHT(strHTML) {
 	"use strict";
-	
-	html=String(html).replace(/<\!\-\-[\s\S]+?\-\->/g,"");
-	
 	var out = {
 		$: "ROOT",
 		_: []
 	},
+	html=String(strHTML).replace(/<\!\-\-[\s\S]+?\-\->/g,""),
 	parent = out,
 	out2 = out,
 	rxQuoteOpen = /^['"]/,
@@ -252,24 +250,24 @@ function resolveAll(path, base) {
 
 var singleTags={area:1,base:1,br:1,col:1,command:1,embed:1,hr:1,img:1,input:1,keygen:1,link:1,meta:1,param:1,source:1,track:1,wbr:1};
 
-function toHT(obj) {
+function toHT(objVDOM) {
 	var attribs = "",
 		r = [], 
-		tn, kids, u, a, i, o, mx,
+		tn, kids, u, a, i=0, o, mx=0,
 		own = r.hasOwnProperty;
 
-	if(obj === u) return "";
+	if(objVDOM === u) return "";
 
-	tn=obj.$;
+	tn=objVDOM.$;
 	
 	// build attribs from values and functions:
-	for(a in obj) 
-		if( a !== "$" && a !== "_" && own.call(obj, a) ) 
-			attribs += (" " + a) + ((obj[a] === "") ? "" : ("=" + JSON.stringify(obj[a])));
+	for(a in objVDOM) 
+		if( a !== "$" && a !== "_" && own.call(objVDOM, a) ) 
+			attribs += (" " + a) + ((objVDOM[a] === "") ? "" : ("=" + JSON.stringify(objVDOM[a])));
 
 	if(singleTags[tn]) return "<" + tn + attribs + " />";
 
-	kids = obj._ || [];
+	kids = objVDOM._ || [];
 	if(kids && !Array.isArray(kids)) kids = [kids];
 
 	for(i = 0, o, mx = kids.length; i < mx; i++) {
@@ -587,8 +585,8 @@ function applyChanges(change, INDEX, ALLS, that) {
 
 
 
-function getRenderer(dest, vdom, hint) {
-
+function getRenderer(elmDest, objVDOM, hint) {
+	var dest=elmDest, vdom=objVDOM;
 	if(typeof dest === "string") dest = document.querySelector(dest);
 	
 	var it= intraHTML.blnTiming ? performance.now() : 0,		
