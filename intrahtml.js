@@ -310,7 +310,7 @@ function applyChanges(change, INDEX, ALLS, that) {
 			parent: parents.parents.slice(-1)[0],
 			isAttrib: !(key - 0.1) && key != "_" && key != "$",
 			change: change
-		}, attrs, a, mx, i, it, kids, temp, content, ext, cp, cc, vals, val, old;
+		}, attrs, a, mx, i, it, kids, temp, content, ext, cp=ochange.elm, cc, vals, mom, val, old;
 
 	if(typeof ochange.elm == "function") ochange.elm = ochange.elmParent;
 	if(bug) console.info("CHANGE: " + INDEX, ochange);
@@ -324,10 +324,9 @@ function applyChanges(change, INDEX, ALLS, that) {
 
 		if(!ochange.isAttrib && (typeof change.val === "string" || Array.isArray(change.val))) {
 
-			cp = ochange.elm;
 			if(!ochange.elmParent.childNodes) ochange.elmParent = ochange.elmParent[ochange.key];
 			if(!ochange.elm) ochange.elm = ochange.elmParent;
-
+			cp = ochange.elm;
 			vals = change.val;
 
 			if(!Array.isArray(vals)) vals = [vals];
@@ -336,53 +335,54 @@ function applyChanges(change, INDEX, ALLS, that) {
 				val = vals[valIndex];
 
 				if(typeof val === "string") { //add text nodes:
-					if(ochange.elm instanceof NodeList) ochange.elm = filter(ochange.elmParents, _setStrParFinder ).pop();
+					if(ochange.elm instanceof NodeList) ochange.elm = cp = filter(ochange.elmParents, _setStrParFinder ).pop();
 
-					if(ochange.elm.childNodes) {
-						if(bug) console.log("set: non attrib, string, elm: ", ochange.key, [val], ochange.elm.outerHTML);
+					if(cp.childNodes) {
+						if(bug) console.log("set: non attrib, string, elm: ", ochange.key, [val], cp.outerHTML);
 						content = document.createTextNode(val);
 
 						if(ochange.key === "_") {
-							ochange.elm.textContent = val;
+							cp.textContent = val;
 						} else {
 							if(ochange.key === "$") {
 
 								temp = document.createElement(change.val);
 
 								if(bug) console.warn("changing tag name!", change);
-								ochange.elm.parentNode.insertBefore(temp, ochange.elm);
+								ochange.elm.parentNode.insertBefore(temp, cp);
 
-								attrs = ochange.elm.attributes;
+								attrs = cp.attributes;
 								for(i = 0, mx = attrs.length; i < mx; i++) {
 									a = attrs[i];
 									temp.setAttribute(a.name, a.value);
 								}
-								kids = ochange.elm.childNodes;
+								kids = cp.childNodes, mom= cp.parentNode;
 								for(i = 0, mx = kids.length; i < mx; i++) temp.appendChild(kids[0]);
-								ochange.elm.parentNode.removeChild(ochange.elm);
+								mom.removeChild(cp);
 							} else {
-								ochange.elm.parentNode.insertBefore(content, ochange.elm);
-								ochange.elm.parentNode.removeChild(ochange.elm);
+								mom=cp.parentNode;
+								mom.insertBefore(content, cp);
+								mom.removeChild(cp);
 							}
 						}
 
 					} else {
 						if(bug) console.log("set: non attrib, string, not elm", val);
-						ochange.elm.textContent = val; //update element
+						cp.textContent = val; //update element
 					}
 
 				} else { //add elms:
-
+					mom=cp.parentNode;
 					content = typeof val === "string" ? document.createTextNode(val) : elementFromString(toHT(val), ochange.elmParent[0] && ochange.elmParent[0].parentNode.tagName).firstChild;
-					if(!ochange.elm.parentNode) ochange.elm = ochange.elmParent;
-					old = ochange.elm.childNodes[+key + valIndex];
+					if(!cp.parentNode) ochange.elm = cp = ochange.elmParent;
+					old = cp.childNodes[+key + valIndex];
 					if(old) {
 						if(bug) console.log("set: non attrib, not string, has old", val);
-						ochange.elm.insertBefore(content, old);
-						ochange.elm.removeChild(ochange.elm);
+						cp.insertBefore(content, old);
+						cp.removeChild(ochange.elm);
 					} else {
 						if(bug) console.log("set: non attrib, not string, no old, appending", [val, content, content.outerHTML || content.textContent]);
-						ochange.elm.appendChild(content);
+						cp.appendChild(content);
 					}
 				}
 
@@ -402,40 +402,41 @@ function applyChanges(change, INDEX, ALLS, that) {
 
 
 		if(ochange.isAttrib) {
-			if(key == "$" && String(path) == key) throw new TypeError("You cannot change the root element of an update-bound element: " + ochange.elm.outerHTML);
+			if(key == "$" && String(path) == key) throw new TypeError("You cannot change the root element of an update-bound element: " + cp.outerHTML);
 			if(key == "$") {
 				temp = document.createElement(change.val);
+				mom = cp.parentNode;
 				if(bug) console.warn("changing tag name!", change);
 
-				ochange.elm.parentNode.insertBefore(temp, ochange.elm);
+				mom.insertBefore(temp, cp);
 
-				attrs = ochange.elm.attributes;
+				attrs = cp.attributes;
 				for(i = 0, mx = attrs.length; i < mx; i++) {
 					a = attrs[i];
 					temp.setAttribute(a.name, a.value);
 				}
-				kids = ochange.elm.childNodes;
+				kids = cp.childNodes;
 				for(i = 0, mx = kids.length; i < mx; i++) temp.appendChild(kids[0]);
-				ochange.elm.parentNode.removeChild(ochange.elm);
+				mom.removeChild(cp);
 
 
 			} else {
 
-				if(!ochange.elm.setAttribute && ochange.elm.parentNode && ochange.elm.parentNode.setAttribute) {
-					ochange.elm = ochange.elm.parentNode;
+				if(!cp.setAttribute && cp.parentNode && cp.parentNode.setAttribute) {
+					ochange.elm = cp = ochange.elm.parentNode;
 				}
 
 				
-				if(!ochange.elm.setAttribute && (cc = filter(ochange.elmParents, function _setParFinderCC(a, b, c) {
+				if(!cp.setAttribute && (cc = filter(ochange.elmParents, function _setParFinderCC(a, b, c) {
 					return a.setAttribute;
 				}).slice(-1)[0]).setAttribute) {
-					ochange.elm = cc;
+					ochange.elm = cp = cc;
 				}
 
 				if(change.val === change.dgfjkdfl34534fd) {
-					ochange.elm.removeAttribute(key); //update element
+					cp.removeAttribute(key); //update element
 				} else {
-					ochange.elm.setAttribute(key, change.val); //update element
+					cp.setAttribute(key, change.val); //update element
 				}
 
 			}
@@ -445,34 +446,39 @@ function applyChanges(change, INDEX, ALLS, that) {
 		}
 
 
-		if(ochange.elm.length && change.val === change.sdgfdf) {
-			for(var i6 = 0, mx6 = ochange.elm.length; i6 < mx6; i6++) ochange.elm[0].parentNode.removeChild(ochange.elm[0]);
+		if(cp.length && change.val === change.sdgfdf) {
+			mom=cp[0].parentNode;
+			for(var i6 = 0, mx6 = cp.length; i6 < mx6; i6++) mom.removeChild(cp[0]);
 		} else {
 
-			if(ochange.elm instanceof NodeList) ochange.elm = filter(ochange.elmParents, function _setParFinder(a, b, c) {
+			if(cp instanceof NodeList) ochange.elm =  cp = filter(ochange.elmParents, function _setParFinder(a, b, c) {
 				return a.textContent !== a.fsdhjklghdklg;
 			}).pop();
 
 			temp = elementFromString(toHT(change.val), ochange.parent.$).firstChild;
 
 			if(bug) console.log("element replacing", [ochange.elm.outerHTML || ochange.elm.textContent], " with ", [temp.outerHTML]);
-			ochange.elm.parentNode.insertBefore(temp, ochange.elm);
-			ochange.elm.parentNode.removeChild(ochange.elm);
+			mom=cp.parentNode;
+			
+			mom.insertBefore(temp, cp);
+			mom.removeChild(cp);
 		}
 		break;
 
 
 	case "add":
 		if(!ochange.isAttrib) {
+			
 			if(ochange.key == "_") {
-				ochange.elm = ochange.elm[change.index];
+				ochange.elm = cp = cp[change.index];
 				ochange.key = change.index;
 				ochange.parent = ochange.parent._;
 				ochange.elmParent = ochange.elmParent.childNodes;
 			}
+			
 			forEach(change.vals, function _valUpdater(val, i, arrWhole) {
 
-				if(!ochange.elmParent.length) ochange.elmParent = ochange.elmParents.slice(-1)[0].childNodes;
+			if(!ochange.elmParent.length) ochange.elmParent = ochange.elmParents.slice(-1)[0].childNodes;
 				if(!ochange.elmParent) ochange.elmParent = ochange.elmParents.slice(-2)[0].childNodes;
 
 				content = typeof val === "string" ? document.createTextNode(val) : elementFromString(toHT(val), ochange.elmParent[0] && ochange.elmParent[0].parentNode.tagName).firstChild;
@@ -480,7 +486,7 @@ function applyChanges(change, INDEX, ALLS, that) {
 
 				if(ext) {
 					ext.parentNode.insertBefore(content, ext);
-					ochange.parent.splice(ochange.key + i, 0, val);
+					// ochange.parent.splice(ochange.key + i, 0, val);
 				} else {
 					if(ochange.elmParent[ochange.key + i]) {
 						ochange.elmParent[ochange.key + i] = content;
@@ -497,8 +503,9 @@ function applyChanges(change, INDEX, ALLS, that) {
 							if(it.nodeType != 3) {
 								it.appendChild(content);
 							} else {
-								it.parentNode.insertBefore(content, it);
-								it.parentNode.insertBefore(it, content);
+								mom=it.parentNode;
+								mom.insertBefore(content, it);
+								mom.insertBefore(it, content);
 							}
 						}
 					}
