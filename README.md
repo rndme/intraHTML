@@ -26,7 +26,7 @@
 * The [Github Cards Demo](http://danml.com/intrahtml/demos/githubcards/) uses fetch()+gitHub API+intraHTML
 * The [Todo Demo](http://danml.com/intrahtml/demos/todo/) shows simple MVVC view updating using ES6
 * The [Minimal Investment Demo](http://danml.com/intrahtml/demos/minimal/) is the simplest demo of live dom updating
-* The [Components Demo](http://danml.com/intrahtml/demos/components/)creates encapsulated web-ready components
+* The [Components Demo](http://danml.com/intrahtml/demos/components/) creates encapsulated web-ready components
 
 
 ### Useful Helper Methods
