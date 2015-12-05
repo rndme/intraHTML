@@ -366,11 +366,9 @@ function applyChanges(change, INDEX, ALLS, that) {
 							}
 						}
 
-						change.elm = content;
 					} else {
 						if(bug) console.log("set: non attrib, string, not elm", val);
 						ochange.elm.textContent = val; //update element
-						change.elm = ochange.elm;
 					}
 
 				} else { //add elms:
@@ -418,7 +416,6 @@ function applyChanges(change, INDEX, ALLS, that) {
 				}
 				kids = ochange.elm.childNodes;
 				for(i = 0, mx = kids.length; i < mx; i++) temp.appendChild(kids[0]);
-				change.elm = temp;
 				ochange.elm.parentNode.removeChild(ochange.elm);
 
 
@@ -441,7 +438,6 @@ function applyChanges(change, INDEX, ALLS, that) {
 					ochange.elm.setAttribute(key, change.val); //update element
 				}
 
-				change.elm = ochange.elm;
 			}
 
 
@@ -460,7 +456,6 @@ function applyChanges(change, INDEX, ALLS, that) {
 			temp = elementFromString(toHT(change.val), ochange.parent.$).firstChild;
 
 			if(bug) console.log("element replacing", [ochange.elm.outerHTML || ochange.elm.textContent], " with ", [temp.outerHTML]);
-			change.elm = temp;
 			ochange.elm.parentNode.insertBefore(temp, ochange.elm);
 			ochange.elm.parentNode.removeChild(ochange.elm);
 		}
@@ -482,8 +477,6 @@ function applyChanges(change, INDEX, ALLS, that) {
 
 				content = typeof val === "string" ? document.createTextNode(val) : elementFromString(toHT(val), ochange.elmParent[0] && ochange.elmParent[0].parentNode.tagName).firstChild;
 				ext = ochange.elmParent[ochange.key + i];
-
-				change.elm = content;
 
 				if(ext) {
 					ext.parentNode.insertBefore(content, ext);
@@ -536,7 +529,6 @@ function applyChanges(change, INDEX, ALLS, that) {
 			for(i = change.index, mx = i + change.num; i < mx; i++) {
 				ochange.elmParent[change.index].remove();
 			}
-			change.elm = ochange.elmParent;
 		} else {
 
 
@@ -569,8 +561,6 @@ function applyChanges(change, INDEX, ALLS, that) {
 				if(bug) console.log("removing many negative", ochange.elmParent, change.index, change.index + change.num);
 				toRemove = slice.call(ochange.elmParent, change.index, change.index + change.num);
 			}
-
-			if(toRemove.length) change.elm = toRemove[0].parentNode;
 
 			if(bug) console.log("removing:", toRemove, change, ochange.parent.slice((change.index - change.num) + 1, (change.index) + 1));
 			forEach(toRemove, function _toRemover(a, b, c) {
@@ -652,6 +642,7 @@ function getRenderer(elmDest, objVDOM, hint) {
   intraHTML.toHTML = toHT;				// turns a vdom object into an HTML string
   intraHTML.odiff=odiff;				// the internal differ used by intraHTML, exposed for testing and general use if desired, dirty checking for example
   intraHTML.updater=getRenderer; // returns a function that accepts HTML to update the view with. faster, but expects DOM not to change between updates.
+  intraHTML.resolvePath=resolvePath;	//turns an array path from a change into an node collection of the leaf and all parents
   
   //publish external options:
   intraHTML.blnTiming = false;	// enable to gather performance information about parsing, diffing, and applying dom updates
