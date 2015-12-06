@@ -55,21 +55,22 @@ fragmentFromString.temp = document.createElement('template');
 if("content" in fragmentFromString.temp) elementFromString = fragmentFromString;
 
 // given an html element or html string, returns a vdom of that markpup:
+
 function fromHTML(source, containerTagName) {
 
 	function scan(ob) {
 		var bag = [],
-			i = 0,
-			v, tag, mx = ob.childNodes.length;
+			i = 0, n=0, cn = ob.childNodes,
+			v, tag, tn, mx = cn.length;
 
 		for(i; i < mx; i++) {
 
-			v = ob.childNodes[i];
+			v = cn[i];
 
-			if(v.tagName) { // recurse sub-tags if any
+			if(tn=v.tagName) { // recurse sub-tags if any
 
 				tag = {
-					$: v.tagName.toLowerCase()
+					$: tn.toLowerCase()
 				};
 
 				for(var i2 = 0, va = v.attributes, attr, mx2 = va.length; i2 < mx2; i2++) {
@@ -78,10 +79,10 @@ function fromHTML(source, containerTagName) {
 				}
 
 				tag._=scan(v);
-				bag.push(tag);
+				bag[n++]=tag;
 
 			} else { //if sub tags? no:			  
-				bag.push(v.nodeValue);
+				bag[n++]=tag;
 			}
 		} 
 		return bag;
@@ -170,10 +171,7 @@ function parseHT(strHTML) {
 		
 			// handle opening tags by making new tag object and adding attribs and kids			
 			n=token.indexOf(" "); 
-			if(n===-1) n=token.indexOf("\t"); 
-			if(n===-1) n=token.search(rxTagNameEnd, 1);
-  
-			
+			if(n===-1) n=token.search(rxTagNameEnd, 1);			
 			if(n===-1) n = 20;
 			name=token.slice(0, n);
 			strAttribs= token.slice(n);
