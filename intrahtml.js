@@ -119,39 +119,25 @@ function parseHT(strHTML) {
 		$: "ROOT",
 		_: []
 	},
-	html=String(strHTML).replace(/<\!\-\-[\s\S]+?\-\->/g,""),
 	parent = out,
 	out2 = out,
-	rxQuoteOpen = /^['"]/,
-	rxQuoteClose = /['"]$/,
-	rxWhite = /\s+/,
-	rxTagNameEnd = /[\s>]/, 
 	tag = out,
-	heap = html.split(/([<>])/),
+	heap = (""+strHTML).replace(/<\!\-\-[\s\S]+?\-\->/g,"").split(/([<>])/),
 	last = "",
 	hint,
 	token,
 	index = 0,
 	mx2 = heap.length,
 	name,
-	r,
-	b = 1,
-	mx,
-	a, n,
+	b = 0,
+	n,
 	strAttribs,
-	cap,
-	val,
-	key,
-	attrValue,
 	parents = [out],
-	overlap,
-	rxBooleanAttrib =/([\w\-]+)()/g  ,
-	rxAttrVal = /([\w\-]+)=([^\s>\/]+)/g,
-	rxAttribValQ = /([\w\-]+)="([^"]*)"/g,
-	rxAttribValA = /([\w\-]+)='([^']*)'/g,
+	rxTagNameEnd = /[\s>]/, 
 	rxEntity = /(&\w+;)/g,
-	rxs=[rxAttribValQ, rxAttribValA, rxAttrVal, rxBooleanAttrib];
+	rxs=[/([\w\-]+)="([^"]*)"/g, /([\w\-]+)='([^']*)'/g, /([\w\-]+)=([^\s>\/]+)/g, /([\w\-]+)()/g];
 	function fnReppr(j, k, v, x, y){ tag[k]=v || ""; return "";   }
+	function rep_entities(j, a){ return entities[a] || a; }
 
 	// loop through all tag opening and closing tags in a flattened array:
 	for(; index < mx2; index++) {
@@ -187,7 +173,7 @@ function parseHT(strHTML) {
 
 
 			// add attribs:			
-			if(strAttribs) for(b=0; b<4; b++)  strAttribs=strAttribs.replace(rxs[b], fnReppr );
+			if(strAttribs!=="") for(b=0; b<4; b++)  strAttribs= strAttribs && strAttribs.replace(rxs[b], fnReppr );
 
 			if(singleTags[name]){
 				last=token;
@@ -204,9 +190,7 @@ function parseHT(strHTML) {
 		}// end if tag opening?
 
 		//if not tag open or close, must be content, add to cursor tag:
-		if(token && !(token === "<" || token === ">") ) tag._.push( token.indexOf("&") === -1 ? token : token.replace(rxEntity, function rep_entities(j, a){
-			return entities[a] || a;
-		}));
+		if(token && !(token === "<" || token === ">") ) tag._.push( token.indexOf("&") === -1 ? token : token.replace(rxEntity, rep_entities));
 		
 		// memorize current value for parser peek-behind to find closing tags:
 		last = token;
