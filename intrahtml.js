@@ -82,7 +82,7 @@ function fromHTML(source, containerTagName) {
 				bag[n++]=tag;
 
 			} else { //if sub tags? no:			  
-				bag[n++]=tag;
+				bag[n++]=v.nodeValue;
 			}
 		} 
 		return bag;
