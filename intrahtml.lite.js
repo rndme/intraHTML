@@ -91,7 +91,6 @@ function fromHTML(source, containerTagName) {
 
 
 	if(typeof source === "string") {
-		if(intraHTML.blnParser) return parseHT(source);
 		return scan(elementFromString(source, containerTagName))[0];
 	} else {
 		return scan({
@@ -102,104 +101,6 @@ function fromHTML(source, containerTagName) {
 	}
 
 } //end fromHTML
-
-var entities={'&quot;':'"', '&amp;':"&", '&lt;':'<', '&gt;': '>', '&apos;': "'"};
-("nbsp,iexcl,cent,pound,curren,yen,brvbar,sect,uml,copy,ordf,laquo,not,shy,reg,macr,deg,plusmn,sup2,sup3,acute,micro,para,middot,cedil,sup1,ordm,raquo,"+
-"frac14,frac12,frac34,iquest,Agrave,Aacute,Acirc,Atilde,Auml,Aring,AElig,Ccedil,Egrave,Eacute,Ecirc,Euml,Igrave,Iacute,Icirc,Iuml,ETH,Ntilde,Ograve,Oacute,"+
-"Ocirc,Otilde,Ouml,times,Oslash,Ugrave,Uacute,Ucirc,Uuml,Yacute,THORN,szlig,agrave,aacute,acirc,atilde,auml,aring,aelig,ccedil,egrave,eacute,ecirc,euml,"+
-"igrave,iacute,icirc,iuml,eth,ntilde,ograve,oacute,ocirc,otilde,ouml,divide,oslash,ugrave,uacute,ucirc,uuml,yacute,thorn,yuml").split(",").forEach(function _buildEntityRX(a,b,c){
-   this["&"+a+";"]= String.fromCharCode(160+b);
-}, entities);
-
-
-
-function parseHT(strHTML) {
-	"use strict";
-	var out = {
-		$: "ROOT",
-		_: []
-	},
-	parent = out,
-	out2 = out,
-	tag = out,
-	heap = (""+strHTML).replace(/<\!\-\-[\s\S]+?\-\->/g,"").split(/([<>])/),
-	last = "",
-	hint,
-	token,
-	index = 0,
-	mx2 = heap.length,
-	name,
-	b = 0,
-	n,
-	strAttribs,
-	parents = [out],
-	rxTagNameEnd = /[\s>]/, 
-	rxEntity = /(&\w+;)/g,
-	rxs=[/([\w\-]+)="([^"]*)"/g, /([\w\-]+)='([^']*)'/g, /([\w\-]+)=([^\s>\/]+)/g, /([\w\-]+)()/g];
-	function fnReppr(j, k, v, x, y){ tag[k]=v || ""; return "";   }
-	function rep_entities(j, a){ return entities[a] || a; }
-
-	// loop through all tag opening and closing tags in a flattened array:
-	for(; index < mx2; index++) {
-		token = heap[index];
-		hint = token.slice(0, 1);
-		
-		
-		if(last === "<"){
-
-			if(hint === "/") { // handle closing tags: (return to parent, clear buffer);
-				tag = parents.pop();
-				out = tag;
-				last = "";
-				continue;
-			}
-		
-		
-			// handle opening tags by making new tag object and adding attribs and kids			
-			n=token.indexOf(" "); 
-			if(n===-1) n=token.search(rxTagNameEnd, 1);			
-			if(n===-1) n = 20;
-			name=token.slice(0, n);
-			strAttribs= token.slice(n);
-			
-			// save old tag to parent children collection:
-			parents.push(out);	
-			
-			// create a new tag object:
-			out._.push(tag = {
-				$: name,
-				_: []
-			});
-
-
-			// add attribs:			
-			if(strAttribs!=="") for(b=0; b<4; b++)  strAttribs= strAttribs && strAttribs.replace(rxs[b], fnReppr );
-
-			if(singleTags[name]){
-				last=token;
-				tag = parents.pop();
-				out = tag;
-				continue; 
-			}
-				
-			// move "cursor" to this new tag:
-			if(out !== tag) parent = out;
-			out = tag;
-			last = token;
-			continue;
-		}// end if tag opening?
-
-		//if not tag open or close, must be content, add to cursor tag:
-		if(token && !(token === "<" || token === ">") ) tag._.push( token.indexOf("&") === -1 ? token : token.replace(rxEntity, rep_entities));
-		
-		// memorize current value for parser peek-behind to find closing tags:
-		last = token;
-	}
-
-	return out2._[0];
-}//end parseHT()
-
-
 
 
 function resolvePath(path, base) { 
@@ -627,8 +528,7 @@ function getRenderer(elmDest, objVDOM, hint) {
   
   // publish useful internal helper methods:
   intraHTML.elementFromString=elementFromString;	// browser-baser parser turns elements into vdom objects
-  intraHTML.fromHTML = fromHTML;	// uses a string or browser-based parser to turn an html string into a vdom object
-  intraHTML.parseHTML=parseHT;  		// string-based parser  turns HTML strings into vdom objects
+  intraHTML.fromHTML = fromHTML;	// uses a browser-based parser to turn an html string into a vdom object
   intraHTML.toHTML = toHT;				// turns a vdom object into an HTML string
   intraHTML.odiff=odiff;				// the internal differ used by intraHTML, exposed for testing and general use if desired, dirty checking for example
   intraHTML.updater=getRenderer; // returns a function that accepts HTML to update the view with. faster, but expects DOM not to change between updates.
@@ -637,7 +537,6 @@ function getRenderer(elmDest, objVDOM, hint) {
   //publish external options:
   intraHTML.blnTiming = false;	// enable to gather performance information about parsing, diffing, and applying dom updates
   intraHTML.blnDebug = false;  	// enable to dump detailed info to the console for debugging 
-  intraHTML.blnParser= true; 		// disable if you have specialized HTML markup with namespaces, funky attribs, or invalid nesting. ~10X slower parsing when disabled.
   
  // publish jQuery plugin: (if applicable)
   if(pub.jQuery) pub.jQuery.fn.intraHTML=function(strContent){
