@@ -34,13 +34,6 @@ function filter(r, f) {
 	return o;
 }
 
-// given a string of html, returns a document fragment of that content:
-function fragmentFromString(strHTML) {
-	var temp = fragmentFromString.temp;
-	temp.innerHTML = strHTML;
-	return temp.content;
-}
-
 
 
 var elementFromString = function elementFromString(strHTML, containerTagName) {
@@ -50,12 +43,8 @@ var elementFromString = function elementFromString(strHTML, containerTagName) {
 };
 
 
-// given a string of html, returns a document fragment of that content:
-fragmentFromString.temp = document.createElement('template');
-// if("content" in fragmentFromString.temp) elementFromString = fragmentFromString;
 
 // given an html element or html string, returns a vdom of that markpup:
-
 function fromHTML(source, containerTagName) {
 
 	function scan(ob) {
