@@ -52,7 +52,7 @@ var elementFromString = function elementFromString(strHTML, containerTagName) {
 
 // given a string of html, returns a document fragment of that content:
 fragmentFromString.temp = document.createElement('template');
-if("content" in fragmentFromString.temp) elementFromString = fragmentFromString;
+// if("content" in fragmentFromString.temp) elementFromString = fragmentFromString;
 
 // given an html element or html string, returns a vdom of that markpup:
 
