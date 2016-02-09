@@ -1,16 +1,5 @@
-// intraHTML: a better innerHTML (partial/non-destructive updates) for faster and simpler view rendering. (c)2015:dandavis, [CCBY4/MIT]
-// usage: intraHTML(element, strNewInnerHTMLContent);
-// includes a slightly modified copy of the odiff JS library by Billy Tetrud, under a modified MIT license per "Free to use for any purpose" from https://github.com/Tixit/odiff/blob/master/odiff.js
-
-(function defineIntraHTML (global, factory) {
-  if (typeof exports === 'object' && exports && typeof exports.nodeName !== 'string') {
-    module.exports=factory(); // CommonJS
-  } else if (typeof define === 'function' && define.amd) {
-    define(['exports'], factory()); // AMD
-  } else {
-     global.intraHTML = factory(global); // script, jq plugin, wsh, asp
-  }
-}(this, function intraHTMLFactory (pub) {
+// intraHTML: a better innerHTML (partial/non-destructive updates) for faster and simpler view rendering. (c)2015:dandavis, 
+var intraHTML=(function intraHTMLFactory (pub) {
 
 if(!Number.isNaN) Number.isNaN = function isNan(value) { return typeof value === "number" && isNaN(value);};
 if (!Array.isArray) Array.isArray = function isArr(arg) { return Object.prototype.toString.call(arg) === '[object Array]';};
@@ -535,4 +524,4 @@ function getRenderer(elmDest, objVDOM, hint) {
   
   return intraHTML;
   
-}));
+}(this));
